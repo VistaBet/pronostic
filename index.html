@@ -9,7 +9,7 @@
 .livebar{position:sticky;top:0;z-index:20;background:#183a65;color:#fff;border-radius:10px;padding:10px 14px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 4px 14px #0003;font-variant-numeric:tabular-nums}.livebar[hidden]{display:none}.livebar a{color:#cfe2ff}.livebar b{font-weight:700}
 .advanced>summary{cursor:pointer;font-weight:700;color:#183a65;font-size:16px}.advanced[open]>summary{margin-bottom:8px}.advanced .panel{box-shadow:none;background:#fbfcfe}details summary{cursor:pointer}
 </style></head><body><main>
-<h1>Probabilités football • 1 / N / 2 <small style="font-size:13px;font-weight:400;color:#65758a">version 31 · automatique</small></h1><p class="intro">Choisis deux sélections nationales ou deux clubs : leurs résultats sont récupérés automatiquement dans des bases gratuites, puis toutes les probabilités s’affichent (1 / N / 2, buts, handicaps, corners, cartons). Rien à copier-coller.</p>
+<h1>Probabilités football • 1 / N / 2 <small style="font-size:13px;font-weight:400;color:#65758a">version 32 · automatique</small></h1><p class="intro">Choisis deux sélections nationales ou deux clubs : leurs résultats sont récupérés automatiquement dans des bases gratuites, puis toutes les probabilités s’affichent (1 / N / 2, buts, handicaps, corners, cartons). Rien à copier-coller.</p>
 <div id="liveBar" class="livebar" hidden><span id="liveText"></span><a href="#estimation">Voir le détail ↓</a></div>
 <section class="panel"><h2>1 · Choisis le match</h2><div class="row"><div><label for="home">Équipe à domicile (1)</label><input id="home" autocomplete="off" list="knownTeams"></div><div><label for="away">Équipe à l’extérieur (2)</label><input id="away" autocomplete="off" list="knownTeams"></div></div><datalist id="knownTeams"></datalist><div class="row" style="margin-top:14px"><div><label for="matchDate">Date du match à prévoir</label><input id="matchDate" type="date"></div><div><label for="halfLife">Poids de la forme récente</label><select id="halfLife"><option value="180">6 mois</option><option value="365" selected>12 mois</option><option value="730">24 mois</option></select><p class="hint">Une rencontre vieille de cette durée compte deux fois moins.</p></div></div><label style="margin-top:9px;font-weight:400"><input id="neutral" type="checkbox" style="width:auto;margin-right:8px">Terrain neutre (aucune correction domicile/extérieur)</label><div class="status warn" id="autoStatus">Choisis les deux équipes dans les listes.</div></section>
 <section class="panel" id="estimation"><h2>2 · Résultat</h2><div id="favorite" class="favorite" hidden></div><div class="scores"><div class="score"><span>1 · Domicile</span><strong id="p1">—</strong></div><div class="score"><span>N · Nul</span><strong id="px">—</strong></div><div class="score"><span>2 · Extérieur</span><strong id="p2">—</strong></div></div><div class="status warn" id="status">Colle les matchs datés des deux équipes.</div><div id="goals" class="notes"></div><div id="winningScores" class="mini-stats" hidden></div><div id="btts" class="mini-stats" hidden></div><div id="totals" class="mini-stats compact-market" hidden></div><div id="handicap" class="mini-stats compact-market" hidden></div><div id="diagnostic" class="mini-stats" hidden></div><div id="form" class="mini-stats" hidden></div><div id="h2hStats" class="mini-stats" hidden></div><h2 style="margin-top:22px">Scores exacts les plus probables</h2><div id="exact" class="exact-grid empty">En attente des résultats.</div><p class="hint">Le tableau classe les scores exacts un par un. La section « Scores gagnants » au-dessus montre séparément les victoires possibles de chaque équipe.</p><h2 style="margin-top:22px">Tous les scores de 0–0 à 4–4</h2><div id="matrix" class="score-matrix empty">En attente des résultats.</div><p class="hint">Repères visuels : vert foncé &gt; 10 % · vert clair 7 à 10 % · orange 5 à 7 % · rouge clair 3 à 5 % · rouge foncé &lt; 3 %. La grille montre les scores 0 à 4 ; le calcul 1 / N / 2 inclut aussi les scores supérieurs.</p></section>
@@ -303,11 +303,42 @@ function fixturePool(extra=[]){
 const ageDays=(iso,cutoff)=>(Date.parse(cutoff+'T00:00:00Z')-Date.parse(iso+'T00:00:00Z'))/86400000;
 const timeWeight=(m,cutoff,halfLife)=>Math.pow(0.5,ageDays(m.iso,cutoff)/halfLife);
 const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+
+const fitCache=new Map();
+function fitLeague(lg,cutoff,halfLife){
+ const key=lg+'|'+cutoff+'|'+halfLife;if(fitCache.has(key))return fitCache.get(key);
+ if(fitCache.size>40)fitCache.clear();
+ const seen=new Set(),ms=[];
+ for(const t of auto.teams.values())if(t.kind==='club'&&t.lg===lg)for(const m of t.list)if(m.lg===lg&&m.iso<cutoff&&norm(m.home)===norm(t.name)){const w=timeWeight(m,cutoff,halfLife);if(w>1e-4)ms.push({h:norm(m.home),a:norm(m.away),g1:m.g1,g2:m.g2,w})}
+ let res=null;
+ if(ms.length>=300){
+  const names=[...new Set(ms.flatMap(m=>[m.h,m.a]))],att=new Map(names.map(n=>[n,1])),def=new Map(names.map(n=>[n,1])),K=3;
+  let ch=1.4,ca=1.1;
+  for(let it=0;it<25;it++){
+   let n1=0,d1=0,n2=0,d2=0;
+   for(const m of ms){n1+=m.w*m.g1;d1+=m.w*att.get(m.h)*def.get(m.a);n2+=m.w*m.g2;d2+=m.w*att.get(m.a)*def.get(m.h)}
+   ch=n1/d1;ca=n2/d2;
+   const an=new Map(names.map(n=>[n,0])),ad=new Map(names.map(n=>[n,0])),dn=new Map(names.map(n=>[n,0])),dd=new Map(names.map(n=>[n,0]));
+   for(const m of ms){
+    an.set(m.h,an.get(m.h)+m.w*m.g1);ad.set(m.h,ad.get(m.h)+m.w*ch*def.get(m.a));
+    an.set(m.a,an.get(m.a)+m.w*m.g2);ad.set(m.a,ad.get(m.a)+m.w*ca*def.get(m.h));
+    dn.set(m.a,dn.get(m.a)+m.w*m.g1);dd.set(m.a,dd.get(m.a)+m.w*ch*att.get(m.h));
+    dn.set(m.h,dn.get(m.h)+m.w*m.g2);dd.set(m.h,dd.get(m.h)+m.w*ca*att.get(m.a));
+   }
+   const mu=(ch+ca)/2;
+   for(const n of names){att.set(n,(an.get(n)+K*mu)/(ad.get(n)+K*mu));def.set(n,(dn.get(n)+K*mu)/(dd.get(n)+K*mu))}
+   let sa=0,sd=0;for(const n of names){sa+=att.get(n);sd+=def.get(n)}sa/=names.length;sd/=names.length;
+   for(const n of names){att.set(n,att.get(n)/sa);def.set(n,def.get(n)/sd)}
+  }
+  res={att,def,ch,ca};
+ }
+ fitCache.set(key,res);return res;
+}
 function forecast(home,away,cutoff,pool,halfLife,neutral=false,ratings=null){
  const prior=pool.filter(m=>m.iso<cutoff&&!m.aet),h=norm(home),a=norm(away),teamMatches=t=>prior.filter(m=>norm(m.home)===t||norm(m.away)===t);
  const hm=teamMatches(h),am=teamMatches(a);
  if(hm.length<3||am.length<3)return {missing:true,nA:hm.length,nB:am.length,available:prior.length};
- const homeMean=(20*1.45+prior.reduce((s,m)=>s+m.g1,0))/(20+prior.length),awayMean=(20*1.25+prior.reduce((s,m)=>s+m.g2,0))/(20+prior.length),reference=(homeMean+awayMean)/2;
+ const homeMean=auto.baseMean?auto.baseMean.h:(20*1.45+prior.reduce((s,m)=>s+m.g1,0))/(20+prior.length),awayMean=auto.baseMean?auto.baseMean.a:(20*1.25+prior.reduce((s,m)=>s+m.g2,0))/(20+prior.length),reference=(homeMean+awayMean)/2;
  const stats=new Map();
  for(const team of new Set(prior.flatMap(m=>[norm(m.home),norm(m.away)]))){const list=teamMatches(team);stats.set(team,{count:list.length,scored:list.reduce((s,m)=>s+(norm(m.home)===team?m.g1:m.g2),0)/list.length,conceded:list.reduce((s,m)=>s+(norm(m.home)===team?m.g2:m.g1),0)/list.length})}
  const strength=(team,venue,forGoals)=>{
@@ -322,7 +353,9 @@ function forecast(home,away,cutoff,pool,halfLife,neutral=false,ratings=null){
  const baselineHome=neutral?reference:homeMean,baselineAway=neutral?reference:awayMean;
  const attackingHome=strength(h,'home',true),concedingAway=strength(a,'away',false);
  const attackingAway=strength(a,'away',true),concedingHome=strength(h,'home',false);
- const baseHome=attackingHome*concedingAway/baselineHome,baseAway=attackingAway*concedingHome/baselineAway;
+ let baseHome=attackingHome*concedingAway/baselineHome,baseAway=attackingAway*concedingHome/baselineAway;
+ const lf=auto.baseMean&&auto.baseMean.lg!==undefined?fitLeague(auto.baseMean.lg,cutoff,halfLife):null;
+ if(lf&&lf.att.has(h)&&lf.att.has(a)){const mix=neutral?1:0,fh=(lf.ch+lf.ca)/2;baseHome=(neutral?fh:lf.ch)*lf.att.get(h)*lf.def.get(a);baseAway=(neutral?fh:lf.ca)*lf.att.get(a)*lf.def.get(h)}
  const weightedWins=weighted.reduce((s,{m,w})=>s+w*Number((norm(m.home)===h?m.g1:m.g2)>(norm(m.home)===h?m.g2:m.g1)),0);
  const weightedLosses=weighted.reduce((s,{m,w})=>s+w*Number((norm(m.home)===h?m.g1:m.g2)<(norm(m.home)===h?m.g2:m.g1)),0);
  const h2hTilt=0.25*(weightedWins-weightedLosses)/(effective+3);
@@ -679,7 +712,7 @@ $('rankingExport').onclick=()=>{
 /* ===== Base de données automatique (gratuite) ===== */
 const natUrls=['https://raw.githubusercontent.com/martj42/international_results/master/results.csv','https://cdn.jsdelivr.net/gh/martj42/international_results@master/results.csv','data/nations.csv'];
 const clubUrl='data/clubs.json';
-const auto={teams:new Map(),elo:new Map(),eloRank:new Map(),leagues:[],lgMean:[]};
+const auto={teams:new Map(),elo:new Map(),eloRank:new Map(),leagues:[],lgMean:[],goalMean:[],baseMean:null};
 const frDate=iso=>iso.split('-').reverse().join('.');
 const todayIso=()=>new Date().toLocaleDateString('sv-SE');
 const yearsAgo=(iso,y)=>new Date(Date.parse(iso+'T00:00:00Z')-y*365.25*86400000).toISOString().slice(0,10);
@@ -754,14 +787,14 @@ async function loadNational(){
 }
 function registerClubs(data){
  dropKind('club');auto.leagues=data.leagues||[];
- const sums=auto.leagues.map(()=>[0,1,2].map(()=>({n:0,h:0,a:0})));
+ const sums=auto.leagues.map(()=>[0,1,2].map(()=>({n:0,h:0,a:0}))),gs=auto.leagues.map(()=>({n:0,h:0,a:0}));
  for(const r of data.matches){
   const [iso,home,away,g1,g2,hc,ac,hy,ay,hr,ar,lg]=r,raw=[hc,ac,hy,ay,hr,ar];
   const s=raw.every(v=>v===null||v===undefined)?null:raw;
-  addMatch('club',{iso,home,away,g1,g2,s,lg});
+  addMatch('club',{iso,home,away,g1,g2,s,lg});if(gs[lg]){gs[lg].n++;gs[lg].h+=g1;gs[lg].a+=g2}
   if(s&&sums[lg])for(let k=0;k<3;k++){const h=s[2*k],a=s[2*k+1];if(Number.isFinite(h)&&Number.isFinite(a)){const x=sums[lg][k];x.n++;x.h+=h;x.a+=a}}
  }
- auto.lgMean=sums.map(list=>list.map(x=>x.n>=30?{h:x.h/x.n,a:x.a/x.n,l:(x.h+x.a)/(2*x.n),n:x.n}:null));
+auto.goalMean=gs.map((x,i)=>x.n>=200?{h:x.h/x.n,a:x.a/x.n,lg:i}:null);auto.lgMean=sums.map(list=>list.map(x=>x.n>=30?{h:x.h/x.n,a:x.a/x.n,l:(x.h+x.a)/(2*x.n),n:x.n}:null));
 }
 function useClubData(data){
  if(!data||!Array.isArray(data.matches)||data.matches.length<100||!Array.isArray(data.leagues))throw Error('fichier clubs.json invalide');
@@ -785,13 +818,14 @@ const matchText=m=>{const [y,mo,d]=m.iso.split('-');return [`${d}.${mo}.${y}`,m.
 const lgLabel=t=>t.kind==='club'&&auto.leagues[t.lg]?` (${auto.leagues[t.lg].name}, ${auto.leagues[t.lg].country})`:'';
 function autoFill(){
  const st=$('autoStatus'),home=$('home').value.trim(),away=$('away').value.trim(),cutoff=$('matchDate').value;
- const warn=text=>{st.className='status warn';st.textContent=text;return false};
+ const warn=text=>{auto.baseMean=null;st.className='status warn';st.textContent=text;return false};
  if(!home||!away)return warn('Choisis les deux équipes dans les listes.');
  if(!/^\d{4}-\d\d-\d\d$/.test(cutoff))return warn('Choisis la date du match.');
  if(!auto.teams.size)return warn('Base de données en cours de chargement…');
  const A=auto.teams.get(norm(home)),B=auto.teams.get(norm(away));
  if(!A||!B)return warn(`Équipe absente de la base : ${[!A&&home,!B&&away].filter(Boolean).join(', ')}. Choisis un nom proposé dans la liste, ou colle les résultats à la main dans les options avancées.`);
  if(A===B)return warn('Choisis deux équipes différentes.');
+ auto.baseMean=(A.kind==='club'&&B.kind==='club'&&A.lg===B.lg&&auto.goalMean[A.lg])||null;
  const lo=yearsAgo(cutoff,5),recent=t=>t.list.filter(m=>m.iso<cutoff&&m.iso>=lo).sort((a,b)=>b.iso.localeCompare(a.iso)).slice(0,60);
  const wA=recent(A),wB=recent(B),hk=norm(home),ak=norm(away),lo2=yearsAgo(cutoff,12);
  const duels=A.list.filter(m=>m.iso<cutoff&&m.iso>=lo2&&((norm(m.home)===hk&&norm(m.away)===ak)||(norm(m.home)===ak&&norm(m.away)===hk))).sort((a,b)=>b.iso.localeCompare(a.iso)).slice(0,10);
