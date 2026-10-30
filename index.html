@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pronostic football • copier-coller</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#20324a;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}main{max-width:1120px;margin:32px auto;padding:0 20px 50px}h1{font-size:27px;margin:0 0 7px;color:#183a65}h2{font-size:17px;margin:0 0 10px}p{line-height:1.5}.intro{color:#52647d;margin:0 0 24px}.panel{background:white;border:1px solid #dae3ee;border-radius:14px;padding:20px;margin:16px 0;box-shadow:0 3px 15px #1b35520b}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}label{display:block;font-weight:650;margin-bottom:7px}input,textarea{font:inherit;border:1px solid #b8c8d9;border-radius:8px;padding:10px;width:100%;background:#fff}input:focus,textarea:focus{outline:2px solid #5b90cc}textarea{height:250px;resize:vertical;font:13px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow:auto}small,.hint{color:#65758a}.hint{font-size:13px;margin:5px 0 14px}.scores{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.score{background:#f0f5fa;border-radius:10px;padding:14px}.score strong{font-size:30px;color:#173d6c}.score span{display:block;color:#52647d;font-size:14px}.status{padding:11px 14px;border-radius:8px;background:#eaf4ed;color:#17623c;margin:12px 0}.status.warn{background:#fff1d5;color:#7a4d05}.tables{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;background:#1d426e;color:white}th,td{padding:7px 8px;border-bottom:1px solid #e3e9f1}td:nth-child(2){text-align:center;white-space:nowrap}td:nth-child(3){text-align:right}ul{padding-left:20px}.notes{font-size:13px;color:#50647d}button{background:#1c4a7d;color:white;border:0;border-radius:8px;padding:11px 15px;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:#e7eef6;color:#23456e}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.error{color:#ad352e}.empty{color:#8b99a9}@media(max-width:760px){.row,.tables,.scores{grid-template-columns:1fr}textarea{height:190px}}
+.exact-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.exact-item{background:#edf3fa;padding:10px;border-radius:8px;display:flex;justify-content:space-between;gap:8px}.exact-item b{color:#173d6c}.exact-item span{font-variant-numeric:tabular-nums}@media(max-width:760px){.exact-grid{grid-template-columns:repeat(2,1fr)}}
+.result{display:inline-block;border-radius:5px;font-weight:750;padding:2px 7px}.result.W{background:#d9f3e3;color:#12633a}.result.L{background:#fce0df;color:#aa2729}.result.D{background:#ffe9c5;color:#925500}.exact-item.tier-high{background:#145a37;color:#fff}.exact-item.tier-high b{color:#fff}.exact-item.tier-good{background:#d8f2dc;color:#15572b}.exact-item.tier-good b{color:#15572b}.exact-item.tier-medium{background:#ffe7bd;color:#855000}.exact-item.tier-medium b{color:#855000}.exact-item.tier-low{background:#fbdedc;color:#9c3332}.exact-item.tier-low b{color:#9c3332}.exact-item.tier-verylow{background:#aa3038;color:#fff}.exact-item.tier-verylow b{color:#fff}.mini-stats{background:#f1f5fa;border-left:3px solid #5279a5;border-radius:4px;margin:12px 0;padding:10px 13px}.mini-stats b{color:#1c426e}
+.score-matrix{display:grid;grid-template-columns:repeat(5,minmax(70px,1fr));gap:7px;max-width:680px}.score-matrix .exact-item{font-size:13px;display:block;text-align:center}.score-matrix .exact-item span{display:block;margin-top:3px}@media(max-width:600px){.score-matrix{grid-template-columns:repeat(3,minmax(70px,1fr))}}
+.favorite{padding:17px;border-radius:11px;background:#e8effa;border-left:5px solid #5876a2;margin:14px 0;color:#233e64}.favorite.clear{background:#e0f3e8;border-color:#16834e;color:#135b38}.favorite.tight{background:#fff0d6;border-color:#d28d1e;color:#754b0f}.favorite strong{display:block;font-size:19px}.favorite small{display:block;margin-top:6px;color:inherit}.score.leader{outline:3px solid #16834e;background:#e7f5ec}.stat-scroll{max-height:550px;overflow-y:auto;padding:6px;border:1px solid #dae3ee;border-radius:9px;background:#f5f8fc}.stat-entry{margin-bottom:12px;padding:10px;background:white;border-radius:8px}.stat-entry textarea{height:145px}.stat-entry label{font-size:13px}.market-card{background:#fff;border:1px solid #d7e1ed;border-radius:12px;padding:15px;margin:16px 0;box-shadow:0 2px 10px #173d6c0a}.market-card h3{margin:0 0 4px;color:#183a65;font-size:17px}.market-card .sample{font-size:12px;color:#5b6c82;margin:0 0 12px}.market-card table{font-variant-numeric:tabular-nums}.market-card th{background:#eaf0f8;color:#183a65}.market-card td,.market-card th{padding:10px}.market-card th:first-child{width:15%}.market-card th:last-child{width:18%}.market-card .pct{font-size:16px;font-weight:700;display:block}.market-card .over{color:#14643e}.market-card .under{color:#1b4f83}.market-card .bar{height:5px;background:#e8edf3;border-radius:6px;overflow:hidden;margin-top:5px}.market-card .bar span{display:block;height:100%;background:#329c63}.market-card .under+.bar span{background:#477fb6}.market-card .past{color:#52647d;font-size:13px}.market-help{font-size:13px;color:#52647d;margin:14px 2px 0}@media(max-width:600px){.market-card{padding:10px}.market-card td,.market-card th{padding:8px 4px;font-size:12px}.market-card .pct{font-size:14px}.market-card th:last-child{width:20%}}.compact-market{max-width:750px;background:#f7f9fc;padding:16px 18px;border-left:4px solid #5279a5}.compact-market> b{display:block;margin-bottom:9px;font-size:16px}.compact-scroll{max-width:660px;overflow-x:auto}.compact-market table{width:100%;table-layout:fixed;font-variant-numeric:tabular-nums}.compact-market th,.compact-market td{padding:9px 8px;text-align:center}.compact-market th:first-child,.compact-market td:first-child{text-align:left;width:22%}.compact-market .handicap-table th:first-child,.compact-market .handicap-table td:first-child{width:42%}.compact-market th{background:#dfeaf6;color:#173d6c}.compact-market td strong{font-size:15px}.compact-market .up{color:#14643e}.compact-market .down{color:#285e96}.compact-market .historic{color:#64758b;font-size:12px}.compact-market small{display:block;margin-top:10px;line-height:1.45}@media(max-width:540px){.compact-market{padding:12px}.compact-market .goal-table{min-width:510px}.compact-market .handicap-table{min-width:360px}}.fifa-list{max-height:320px;overflow:auto;margin-top:8px}.fifa-list table{max-width:530px;font-variant-numeric:tabular-nums}.fifa-list td:last-child{text-align:right}.fifa-list summary{cursor:pointer}select{font:inherit;border:1px solid #b8c8d9;border-radius:8px;background:white;padding:10px;width:100%}
+.livebar{position:sticky;top:0;z-index:20;background:#183a65;color:#fff;border-radius:10px;padding:10px 14px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 4px 14px #0003;font-variant-numeric:tabular-nums}.livebar[hidden]{display:none}.livebar a{color:#cfe2ff}.livebar b{font-weight:700}
+.advanced>summary{cursor:pointer;font-weight:700;color:#183a65;font-size:16px}.advanced[open]>summary{margin-bottom:8px}.advanced .panel{box-shadow:none;background:#fbfcfe}details summary{cursor:pointer}
+</style></head><body><main>
+<h1>Probabilités football • 1 / N / 2 <small style="font-size:13px;font-weight:400;color:#65758a">version 30 · automatique</small></h1><p class="intro">Choisis deux sélections nationales ou deux clubs : leurs résultats sont récupérés automatiquement dans des bases gratuites, puis toutes les probabilités s’affichent (1 / N / 2, buts, handicaps, corners, cartons). Rien à copier-coller.</p>
+<div id="liveBar" class="livebar" hidden><span id="liveText"></span><a href="#estimation">Voir le détail ↓</a></div>
+<section class="panel"><h2>1 · Choisis le match</h2><div class="row"><div><label for="home">Équipe à domicile (1)</label><input id="home" autocomplete="off" list="knownTeams"></div><div><label for="away">Équipe à l’extérieur (2)</label><input id="away" autocomplete="off" list="knownTeams"></div></div><datalist id="knownTeams"></datalist><div class="row" style="margin-top:14px"><div><label for="matchDate">Date du match à prévoir</label><input id="matchDate" type="date"></div><div><label for="halfLife">Poids de la forme récente</label><select id="halfLife"><option value="180">6 mois</option><option value="365" selected>12 mois</option><option value="730">24 mois</option></select><p class="hint">Une rencontre vieille de cette durée compte deux fois moins.</p></div></div><label style="margin-top:9px;font-weight:400"><input id="neutral" type="checkbox" style="width:auto;margin-right:8px">Terrain neutre (aucune correction domicile/extérieur)</label><div class="status warn" id="autoStatus">Choisis les deux équipes dans les listes.</div></section>
+<section class="panel" id="estimation"><h2>2 · Résultat</h2><div id="favorite" class="favorite" hidden></div><div class="scores"><div class="score"><span>1 · Domicile</span><strong id="p1">—</strong></div><div class="score"><span>N · Nul</span><strong id="px">—</strong></div><div class="score"><span>2 · Extérieur</span><strong id="p2">—</strong></div></div><div class="status warn" id="status">Colle les matchs datés des deux équipes.</div><div id="goals" class="notes"></div><div id="winningScores" class="mini-stats" hidden></div><div id="btts" class="mini-stats" hidden></div><div id="totals" class="mini-stats compact-market" hidden></div><div id="handicap" class="mini-stats compact-market" hidden></div><div id="diagnostic" class="mini-stats" hidden></div><div id="form" class="mini-stats" hidden></div><div id="h2hStats" class="mini-stats" hidden></div><h2 style="margin-top:22px">Scores exacts les plus probables</h2><div id="exact" class="exact-grid empty">En attente des résultats.</div><p class="hint">Le tableau classe les scores exacts un par un. La section « Scores gagnants » au-dessus montre séparément les victoires possibles de chaque équipe.</p><h2 style="margin-top:22px">Tous les scores de 0–0 à 4–4</h2><div id="matrix" class="score-matrix empty">En attente des résultats.</div><p class="hint">Repères visuels : vert foncé &gt; 10 % · vert clair 7 à 10 % · orange 5 à 7 % · rouge clair 3 à 5 % · rouge foncé &lt; 3 %. La grille montre les scores 0 à 4 ; le calcul 1 / N / 2 inclut aussi les scores supérieurs.</p></section>
+<section class="panel" id="marketsPanel"><h2>3 · Corners et cartons</h2><div id="autoMarkets"></div></section>
+<section class="panel" id="dataPanel"><h2>Base de données · mise à jour automatique</h2><p class="hint">Sélections nationales : récupérées gratuitement à chaque ouverture depuis la base ouverte « international_results » (GitHub), sans compte ni clé ; la note Elo est recalculée à partir de tous ces résultats. Clubs : première division de 27 pays, buts pour tous et corners + cartons pour 11 grands championnats (dont la Belgique), via un fichier mis à jour chaque jour par ton propre dépôt GitHub gratuit.</p><div id="natStatus" class="notes">Chargement…</div><div id="clubStatus" class="notes" style="margin-top:8px">Clubs : chargement…</div><div class="actions"><button id="dataReload" class="secondary">Recharger les données</button></div><details style="margin-top:16px"><summary><b>Clubs : activer la mise à jour automatique</b> (une seule fois, 10 minutes)</summary><p class="hint">Suis le fichier LISEZ-MOI.txt du dossier fourni : création d’un dépôt GitHub gratuit, envoi des fichiers, activation de GitHub Pages et lancement du robot de mise à jour. Ensuite, ouvre simplement l’adresse https://TON-PSEUDO.github.io/pronostic/ : tout se met à jour tout seul chaque jour.</p><label for="clubFile">Ou charge à la main un fichier clubs.json (téléchargé depuis ton dépôt)</label><input type="file" id="clubFile" accept=".json,application/json"></details></section>
+<details class="panel advanced" id="advanced"><summary>Options avancées : saisie manuelle, import API-Football, cartons et corners, classement FIFA</summary><section class="panel"><h2>Matchs datés (saisie manuelle)</h2><p class="hint">Remplies automatiquement par la base ; tu peux aussi y coller tes propres résultats (ils ne sont alors pas écrasés). Format : date jj.mm.aa, équipes, puis les deux scores.</p><div class="row"><div><label for="recentHome">Matchs datés de l’équipe à domicile</label><textarea id="recentHome" spellcheck="false" placeholder="Colle tous les matchs disponibles, dates et scores compris"></textarea></div><div><label for="recentAway">Matchs datés de l’équipe à l’extérieur</label><textarea id="recentAway" spellcheck="false" placeholder="Colle tous les matchs disponibles, dates et scores compris"></textarea></div></div><label for="h2h" style="margin-top:18px">Confrontations directes (facultatif)</label><textarea id="h2h" spellcheck="false" style="height:190px" placeholder="Colle ici le bloc des confrontations directes"></textarea><div class="actions"><button id="clear" class="secondary">Effacer les résultats</button></div></section>
+<section class="panel"><h2>Importer les matchs avec API-Football (facultatif, avec clé)</h2><p class="hint">1. Crée ton compte sur <a href="https://dashboard.api-football.com/" target="_blank" rel="noopener">API-Football</a> et copie ta clé API-Sports. 2. Recherche chaque équipe dans les deux colonnes ci-dessous. 3. Choisis le résultat correspondant et importe. Une connexion Internet et un accès aux statistiques des compétitions concernées sont nécessaires.</p><label for="apiKey">Clé API-Sports (elle reste uniquement dans cette page ouverte)</label><input id="apiKey" type="password" autocomplete="off" placeholder="Ta clé x-apisports-key"><div class="actions"><button id="apiTest" class="secondary">Tester ma clé</button><button id="apiSearch">Rechercher les deux équipes</button></div><div class="row" style="margin-top:14px"><div><label for="apiQueryHome">Nom de l’équipe 1</label><input id="apiQueryHome" placeholder="Ex. Pays de Galles ou Wales"><button id="apiFindHome" class="secondary" style="margin:8px 0">Rechercher l’équipe 1</button><p id="apiHomeInfo" class="hint"></p><label for="apiHome">Choisir l’équipe 1</label><select id="apiHome"><option value="">Recherche nécessaire</option></select></div><div><label for="apiQueryAway">Nom de l’équipe 2</label><input id="apiQueryAway" placeholder="Ex. Danemark ou Denmark"><button id="apiFindAway" class="secondary" style="margin:8px 0">Rechercher l’équipe 2</button><p id="apiAwayInfo" class="hint"></p><label for="apiAway">Choisir l’équipe 2</label><select id="apiAway"><option value="">Recherche nécessaire</option></select></div></div><details style="margin-top:14px"><summary>Utiliser directement les identifiants API (si la recherche ne trouve rien)</summary><div class="row" style="margin-top:10px"><div><label for="apiHomeId">Identifiant équipe 1</label><input type="number" min="1" id="apiHomeId" placeholder="Ex. 767 pour Wales"></div><div><label for="apiAwayId">Identifiant équipe 2</label><input type="number" min="1" id="apiAwayId" placeholder="Ex. 21 pour Denmark"></div></div><p class="hint">Les identifiants saisis ici sont prioritaires sur les listes.</p></details><label for="apiSeason" style="margin-top:14px">Saison API à consulter (année de début, ex. 2025 pour 2025–2026)</label><input id="apiSeason" type="number" min="2000" max="2100" value="2026" style="max-width:200px"><p class="hint">Le plan gratuit limite les saisons disponibles. Choisis une saison autorisée dans ton tableau de bord ; une saison ancienne fournit un historique ancien, pas les cinq derniers matchs actuels.</p><div class="actions"><button id="apiLoad">Importer les cinq matchs et calculer</button><button id="apiForget" class="secondary">Effacer la clé</button></div><p id="apiStatus" class="hint" aria-live="polite">Aucune connexion effectuée. Les imports consomment le quota de ton compte. Aucun match importé n’est enregistré.</p></section>
+<section class="panel"><h2>Cartons et corners des cinq derniers matchs (facultatif)</h2><p class="hint">Dans chaque case, colle les six lignes brutes d’un seul match, sans date. Tu peux aussi coller seulement les six nombres, un par ligne, dans cet ordre : corners domicile, corners extérieur, jaunes domicile, jaunes extérieur, rouges domicile, rouges extérieur. Chaque case indique directement la date et l’adversaire du résultat collé plus haut ; match 1 = le plus récent. Les intitulés domicile/extérieur correspondent à l’ancien match. Les pourcentages s’affichent juste sous les cases dès qu’un match valide est renseigné pour chaque équipe. Les données ne sont pas enregistrées.</p><div class="row"><div><h3 id="statsHomeTitle">Équipe à domicile</h3><div class="stat-scroll" id="statHomeFields"></div></div><div><h3 id="statsAwayTitle">Équipe à l’extérieur</h3><div class="stat-scroll" id="statAwayFields"></div></div></div><p id="statsInfo" class="hint"></p><div id="extras" class="mini-stats" aria-live="polite"></div></section>
+<section class="panel"><h2>Force des équipes nationales (facultatif)</h2><p class="hint">Entre les points FIFA des deux sélections pour tenir compte de leur niveau sur davantage que cinq matchs. Les points ne sont jamais enregistrés. La liste de nations enregistrée en bas de page est utilisée automatiquement si les cases restent vides. Pour un club dont le nom correspond à une nation, décoche « Utiliser FIFA ». La liste initiale a été fournie par toi : vérifie sa date avant utilisation ; elle ne se met pas à jour automatiquement.</p><div class="row"><div><label for="ratingHome">Points FIFA de l’équipe à domicile</label><input id="ratingHome" type="number" min="400" max="2500" step="0.01" placeholder="Ex. 1582.54"></div><div><label for="ratingAway">Points FIFA de l’équipe à l’extérieur</label><input id="ratingAway" type="number" min="400" max="2500" step="0.01" placeholder="Ex. 1948.97"></div></div><label style="font-weight:400"><input type="checkbox" id="useFifa" checked style="width:auto;margin-right:8px">Utiliser une note de force pour les sélections (Elo automatique, sinon liste FIFA)</label><p id="ratingInfo" class="hint"></p></section>
+<section class="panel"><h2>Matchs reconnus</h2><p class="hint">Vérifie cette liste avant d’utiliser les pourcentages. W = victoire, L = défaite, D = nul. Pour les confrontations, W/L/D est présenté du point de vue de l’équipe à domicile saisie en haut.</p><div class="tables"><div><h3 id="titleHome">Domicile</h3><div id="tableHome"></div></div><div><h3 id="titleAway">Extérieur</h3><div id="tableAway"></div></div><div><h3 id="titleH2h">Confrontations</h3><div id="tableH2h"></div></div></div></section>
+<section class="panel"><h2>Mes équipes</h2><p class="hint">Cette liste conserve uniquement les noms. Le classement FIFA, stocké séparément en bas de page, conserve aussi rangs et points ; aucun résultat de match n’est enregistré.</p><div id="dbInfo" class="notes"></div><div class="actions"><button id="save">Enregistrer les noms des équipes</button><button id="export" class="secondary">Exporter les noms (.json)</button><button id="import" class="secondary">Importer des noms (.json)</button><input id="importFile" type="file" accept="application/json,.json" hidden></div><p id="dbMessage" class="hint" aria-live="polite"></p></section>
+<section class="panel" id="fifaPanel"><h2>Classement FIFA enregistré</h2><p class="hint">Colle une liste « rang, nom, variation éventuelle, points », dans le format de ton exemple. Les variations +1 / −2 sont ignorées. Le bouton remplace la liste actuelle seulement si toutes les lignes sont valides. Seuls le rang, le nom et les points sont conservés dans ce navigateur ; aucun match n’est stocké.</p><label for="rankingDate">Date de ce classement (si connue)</label><input type="date" id="rankingDate" style="max-width:240px"><label for="rankingPaste" style="margin-top:14px">Coller le classement des nations</label><textarea id="rankingPaste" style="height:210px" spellcheck="false" placeholder="1.&#10;Spain&#10;+1&#10;1995.88&#10;2.&#10;Argentina&#10;-1&#10;1970.37"></textarea><div class="actions"><button id="rankingSave">Enregistrer le classement collé</button><button class="secondary" id="rankingExport">Exporter le classement (.json)</button></div><p id="rankingStatus" class="hint" aria-live="polite"></p><div id="rankingPreview" class="notes"></div></section></details>
+<section class="panel notes"><h2>Comment le calcul fonctionne</h2><p><b>Mode automatique.</b> Pour les sélections, la page télécharge à chaque ouverture le fichier de résultats de la base « international_results » (matchs internationaux masculins, tenue à jour par la communauté : le dernier match connu est indiqué dans « Base de données »). Les 60 derniers matchs des cinq dernières années de chaque équipe et leurs dix dernières confrontations directes alimentent le calcul. Les scores de cette base incluent la prolongation (pas les tirs au but) : c’est une approximation du score à 90 minutes. Une note Elo est calculée sur tout l’historique (méthode type eloratings.net) et remplace la liste FIFA quand les deux équipes sont des sélections. Pour les clubs, les scores à 90 minutes de football-data.co.uk (4 dernières saisons) alimentent le même calcul.</p><p><b>Corners et cartons.</b> Disponibles pour les clubs des 11 grands championnats de la base (Angleterre, Écosse, Allemagne, Italie, Espagne, France, Pays-Bas, Belgique, Portugal, Turquie, Grèce). Pour chaque équipe, la page calcule une moyenne pondérée dans le temps de ce qu’elle obtient et de ce qu’elle concède, ramenée vers la moyenne du championnat, puis combine les deux équipes et applique l’avantage du terrain observé dans le championnat. Le total suit une loi de Poisson : c’est une approximation indicative. Aucune source gratuite ne fournit ces statistiques pour les sélections nationales.</p><p><b>Handicaps et buts.</b> Les probabilités de victoire avec 1, 2, 3 ou 4 buts d’écart et les lignes de buts de 0,5 à 5,5 viennent de la somme des scores exacts. Ce sont des estimations statistiques, pas des certitudes : compare-les toujours à la cote proposée et ne joue que ce que tu peux te permettre de perdre.</p><p>Les rencontres datées avant le match sont pondérées dans le temps. Le modèle estime séparément attaque et défense, distingue domicile et extérieur, puis multiplie leurs forces relatives pour calculer les buts attendus. Les adversaires ayant au moins trois matchs parmi les résultats collés modifient légèrement cette estimation. Un lissage équivalant à deux matchs réduit les extrêmes lorsque l’historique est court. Les confrontations directes datées modifient les buts attendus. Le 1 / N / 2 provient de la somme des probabilités des scores exacts.</p><p>Si deux valeurs FIFA sont disponibles, la différence de points est convertie en attente de résultat selon la <a href="https://inside.fifa.com/fifa-rankings/world-ranking/procedure-men" target="_blank" rel="noopener">formule publiée par la FIFA</a>. Elle est combinée aux scores récents, puis le rapport des buts attendus est ajusté pour respecter cette attente. Cette conversion vers des scores est une hypothèse du fichier, non une probabilité publiée par la FIFA. Le poids de la référence diminue lorsque davantage de matchs sont collés. Le classement des nations en bas de page est celui fourni par l’utilisateur. Il s’applique si les deux noms sont reconnus et sa date, quand elle est connue, précède le match prévu. Il ne se met pas à jour en ligne.</p><p>À partir de 80 matchs antérieurs exploitables dans les blocs collés, une correction approximative Dixon–Coles des petits scores est estimée. Un score <b>1(4) – 1(1)</b> est lu <b>1 – 1</b> ; les tirs au but sont ignorés. Les rencontres <b>AET</b> sont exclues si le score à 90 minutes est inconnu. Les pourcentages restent indicatifs et aucun match n’est conservé dans la liste d’équipes.</p></section>
+</main><script>
+'use strict';
+const $=id=>document.getElementById(id);
+const isDate=s=>/^\d{2}\.\d{2}\.\d{2,4}$/.test(s);
+const isScore=s=>/^\d{1,2}(?:\(\d{1,2}\))?$/.test(s);
+const goal=s=>Number(s.match(/^\d+/)[0]);
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>s.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const fifaKey='pronostic-football-fifa-v1';
+const fifaSeed=`Spain|1995.88
+Argentina|1970.37
+France|1948.97
+England|1922.83
+Brazil|1804.92
+Morocco|1803.99
+Portugal|1787.85
+Belgium|1778.36
+Netherlands|1775.54
+Mexico|1754.30
+Colombia|1739.89
+Germany|1726.22
+Croatia|1723.05
+Switzerland|1710.88
+Italy|1704.73
+USA|1690.33
+Japan|1673.68
+Senegal|1653.43
+Norway|1651.29
+Uruguay|1634.70
+Denmark|1619.47
+Iran|1609.85
+Austria|1598.82
+Egypt|1597.04
+Ecuador|1592.59
+Nigeria|1585.02
+Turkey|1582.54
+Australia|1581.51
+Algeria|1576.80
+Canada|1571.34
+Ivory Coast|1565.47
+South Korea|1558.72
+Ukraine|1549.29
+Paraguay|1542.48
+Russia|1529.60
+Poland|1526.18
+Sweden|1525.58
+Wales|1516.95
+Hungary|1506.39
+Serbia|1502.13
+D.R. Congo|1495.48
+Scotland|1491.22
+Cameroon|1481.24
+Panama|1478.41
+Slovakia|1473.66
+Greece|1473.19
+Venezuela|1469.18
+Czech Republic|1467.26
+Chile|1458.20
+Peru|1457.69
+Costa Rica|1456.03
+Romania|1455.89
+Mali|1455.59
+South Africa|1451.24
+Ireland|1441.10
+Slovenia|1441.09
+Tunisia|1426.58
+Saudi Arabia|1425.52
+Qatar|1411.06
+Uzbekistan|1409.73
+Bosnia & Herzegovina|1408.93
+Burkina Faso|1406.99
+Iraq|1404.17
+Cape Verde|1402.97
+Ghana|1387.00
+Honduras|1378.97
+Albania|1376.03
+United Arab Emirates|1370.47
+North Macedonia|1369.16
+Northern Ireland|1365.30
+Jamaica|1357.84
+Georgia|1355.26
+Jordan|1350.41
+Iceland|1342.77
+Finland|1341.92
+Israel|1333.90
+Bolivia|1326.00
+Kosovo|1319.12
+Oman|1306.90
+Montenegro|1301.98
+Guinea|1295.60
+Curacao|1285.64
+Syria|1283.05
+Gabon|1272.51
+Bulgaria|1271.68
+New Zealand|1269.80
+Angola|1265.58
+Haiti|1264.58
+Uganda|1264.09
+Zambia|1255.82
+China|1254.81
+Bahrain|1254.41
+Benin|1252.17
+Thailand|1250.80
+Palestine|1243.71
+Belarus|1242.88
+Guatemala|1238.74
+Luxembourg|1232.82
+Vietnam|1227.20
+El Salvador|1225.34
+Tajikistan|1224.19
+Trinidad & Tobago|1219.59
+Mozambique|1218.62
+Madagascar|1202.69
+Equatorial Guinea|1195.20
+Kyrgyzstan|1192.16
+Armenia|1189.63
+Comoros|1187.91
+Kenya|1185.08
+Libya|1182.08
+Kazakhstan|1180.78
+Tanzania|1180.27
+Mauritania|1176.68
+Niger|1175.33
+Lebanon|1172.22
+Gambia|1159.64
+Sudan|1157.22
+Indonesia|1157.14
+Togo|1152.76
+North Korea|1151.05
+Namibia|1148.84
+Sierra Leone|1147.56
+Faroe Islands|1136.59
+Cyprus|1133.25
+Suriname|1132.43
+Azerbaijan|1132.00
+Estonia|1130.64
+Rwanda|1126.62
+Malawi|1122.05
+Zimbabwe|1119.78
+Nicaragua|1114.63
+Guinea Bissau|1108.38
+Kuwait|1106.47
+Congo|1105.96
+Philippines|1100.95
+Malaysia|1086.22
+Latvia|1085.66
+India|1084.93
+Central Africa|1080.82
+Liberia|1080.44
+Turkmenistan|1078.65
+Burundi|1078.01
+Ethiopia|1077.52
+Dominican Republic|1076.50
+Yemen|1065.24
+Lesotho|1064.29
+Botswana|1063.63
+Singapore|1057.95
+Lithuania|1056.85
+Guyana|1049.32
+New Caledonia|1036.95
+Saint Kitts and Nevis|1036.33
+Solomon Islands|1031.89
+Puerto Rico|1024.30
+Fiji|1024.17
+Hong Kong|1024.16
+Tahiti|1019.04
+Myanmar|1009.39
+Moldova|1008.24
+Vanuatu|1002.53
+Malta|992.79
+Antigua and Barbuda|986.58
+Grenada|981.82
+Cuba|981.42
+Eswatini|979.01
+Saint Lucia|976.71
+Bermuda|975.05
+Papua New Guinea|974.90
+South Sudan|970.94
+Saint Vincent and the Grenadines|968.27
+Afghanistan|968.07
+Andorra|946.43
+Maldives|943.92
+Chinese Taipei|923.78
+Cambodia|922.32
+Montserrat|916.75
+Nepal|914.54
+Mauritius|911.49
+Barbados|909.89
+Belize|907.00
+Bangladesh|902.93
+Dominica|897.69
+Chad|896.85
+Eritrea|887.06
+Laos|885.03
+Cook Islands|877.53
+Sri Lanka|876.86
+Samoa|876.41
+Aruba|875.61
+Mongolia|874.47
+American Samoa|871.61
+Bhutan|870.81
+Macau|858.03
+Brunei|857.73
+Sao Tome and Principe|855.44
+Djibouti|853.58
+Cayman Islands|850.06
+Pakistan|840.28
+Somalia|839.17
+Tonga|835.64
+Timor-Leste|831.00
+Gibraltar|820.26
+Guam|819.54
+Seychelles|804.16
+Turks and Caicos Islands|803.98
+Liechtenstein|797.70
+Bahamas|786.82
+United States Virgin Islands|779.76
+British Virgin Islands|777.41
+Anguilla|760.25
+San Marino|721.20`.split('\n').map((line,i)=>{const [name,points]=line.split('|');return {rank:i+1,name,points:Number(points)}});
+let fifaDb={version:1,date:'',teams:fifaSeed};
+try{const saved=JSON.parse(localStorage.getItem(fifaKey)||'null');if(saved?.version===1&&Array.isArray(saved.teams)&&saved.teams.length)fifaDb=saved;else localStorage.setItem(fifaKey,JSON.stringify(fifaDb))}catch{}
+const nationAlias={turkiye:'turkey',turquie:'turkey',unitedstates:'usa',unitedstatesofamerica:'usa',us:'usa',etatsunis:'usa',czechia:'czechrepublic',tchequie:'czechrepublic',cotedivoire:'ivorycoast',koreearepublic:'southkorea',korearepublic:'southkorea',coreedusud:'southkorea',republicofkorea:'southkorea',democraticrepublicofcongo:'drcongo',democraticrepublicofthecongo:'drcongo',congodr:'drcongo',rdcongo:'drcongo',bosniaandherzegovina:'bosniaherzegovina',bosnieherzegovine:'bosniaherzegovina',trinidadandtobago:'trinidadtobago',capeverdeislands:'capeverde',capvert:'capeverde',centralafricanrepublic:'centralafrica',chinapr:'china',republicofireland:'ireland',irlande:'ireland',irlandedunord:'northernireland',paysdegalles:'wales',danemark:'denmark',angleterre:'england',espagne:'spain',allemagne:'germany',belgique:'belgium',italie:'italy',norvege:'norway',suede:'sweden',suisse:'switzerland',paysbas:'netherlands',grece:'greece',bulgarie:'bulgaria',maroc:'morocco',algerie:'algeria',tunisie:'tunisia',bresil:'brazil',argentine:'argentina',japon:'japan',ecosse:'scotland',pologne:'poland',autriche:'austria',croatie:'croatia',roumanie:'romania',russie:'russia',hongrie:'hungary',serbie:'serbia',slovaquie:'slovakia',slovenie:'slovenia',islande:'iceland',finlande:'finland',egypte:'egypt',mexique:'mexico',colombie:'colombia',perou:'peru',equateur:'ecuador',australie:'australia',nigeria:'nigeria',cameroun:'cameroon',ghana:'ghana',ukraine:'ukraine',geurgie:'georgia',georgie:'georgia',albanie:'albania',macedoinedunord:'northmacedonia',luxembourg:'luxembourg',chypre:'cyprus',israel:'israel',estonie:'estonia',lettonie:'latvia',lituanie:'lithuania',armenie:'armenia',azerbaidjan:'azerbaijan',moldavie:'moldova',malte:'malta',kazakhstan:'kazakhstan',ilesferoe:'faroeislands',afriquedusud:'southafrica',arabiesaoudite:'saudiarabia',coreedunord:'northkorea',nouvellezelande:'newzealand',etatsunisdamerique:'usa',canada:'canada',jamaique:'jamaica',honduras:'honduras',paraguay:'paraguay',chili:'chile',bolivie:'bolivia'};
+const nationKey=name=>nationAlias[norm(name)]||norm(name);
+function ratingsFor(home,away,date){
+ if(!$('useFifa').checked)return {valid:false,source:'Référence FIFA désactivée',incomplete:false};
+ const available=!fifaDb.date||fifaDb.date<=date;
+ const find=name=>available?fifaDb.teams.find(x=>nationKey(x.name)===nationKey(name)):null;
+ const first=find(home),second=find(away);
+ const userHome=$('ratingHome').value.trim(),userAway=$('ratingAway').value.trim();
+ const kindOf=n=>auto.teams.get(norm(n))?.kind,eloH=auto.elo.get(nationKey(home)),eloA=auto.elo.get(nationKey(away));
+ if(!userHome&&!userAway&&kindOf(home)==='nat'&&kindOf(away)==='nat'&&eloH!==undefined&&eloA!==undefined)return {home:eloH,away:eloA,valid:true,scale:400,adv:$('neutral').checked?0:100,source:'Note Elo calculée automatiquement à partir de tous les résultats de la base',incomplete:false,rankHome:auto.eloRank.get(nationKey(home)),rankAway:auto.eloRank.get(nationKey(away))};
+ const h=userHome?Number(userHome):first?.points,a=userAway?Number(userAway):second?.points;
+ const valid=Number.isFinite(h)&&Number.isFinite(a)&&h>=400&&h<=2500&&a>=400&&a<=2500;
+ const label=fifaDb.date?`classement enregistré du ${fifaDb.date}`:'classement enregistré (date non renseignée)';
+ const source=userHome||userAway?`Points manuels prioritaires · ${label}`:label;
+ return {home:h,away:a,valid,source,incomplete:Boolean(userHome||userAway)&&!valid,rankHome:first?.rank,rankAway:second?.rank,missing:!valid?`${!first&&!userHome?home:''} ${!second&&!userAway?away:''}`.trim():''};
+}
+function parse(raw,teamA,teamB){
+ const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ const starts=[];for(let i=0;i<lines.length;i++)if(isDate(lines[i]))starts.push(i);
+ const matches=[],problems=[];
+ for(let k=0;k<starts.length;k++){
+  const block=lines.slice(starts[k],starts[k+1]??lines.length),date=block[0];
+  const si=block.findIndex((x,i)=>i>0&&isScore(x)&&isScore(block[i+1]||''));
+  if(si<0){problems.push(`${date} : scores introuvables`);continue}
+  const before=block.slice(1,si),g1=goal(block[si]),g2=goal(block[si+1]);
+  // Copied pages repeat each team name twice. The final four labels before the scores are the teams.
+  let names=before.filter((x,i)=>i===0||x!==before[i-1]);
+  names=names.filter(x=>!['FI','WC','UNL','EUR','AET','PEN','Pen','FRI'].includes(x));
+  if(names.length<2){problems.push(`${date} : équipes introuvables`);continue}
+  const home=names[names.length-2],away=names[names.length-1];
+  const tail=block.slice(si+2).find(x=>/^[WLD]$/i.test(x));
+  let result=null;if(norm(home)===norm(teamA))result=g1>g2?'W':g1<g2?'L':'D';
+  else if(norm(away)===norm(teamA))result=g2>g1?'W':g2<g1?'L':'D';
+  matches.push({date,home,away,g1,g2,result,tag:tail||'',pen:/(?:\d+\(\d+\))/.test(block[si])||/(?:\d+\(\d+\))/.test(block[si+1]),aet:before.some(x=>x.toUpperCase()==='AET')});
+  if(tail&&result&&tail.toUpperCase()!==result&&!matches.at(-1).pen)problems.push(`${date} : résultat ${tail} différent du score`);
+ }
+ if(raw.trim()&&!starts.length)problems.push('Aucune date reconnue (format jj.mm.aa).');
+ return {matches,problems};
+}
+function table(matches,team){
+ if(!matches.length)return '<p class="empty">Aucun match reconnu</p>';
+ return '<table><thead><tr><th>Date / match</th><th>Score</th><th>Pour–contre</th><th>W/L/D</th></tr></thead><tbody>'+matches.map(m=>{
+ const side=norm(m.home)===norm(team)?'home':norm(m.away)===norm(team)?'away':null;
+ const gf=side==='home'?m.g1:side==='away'?m.g2:null,ga=side==='home'?m.g2:side==='away'?m.g1:null;
+ const outcome=(m.tag||m.result||'').toUpperCase();
+ return `<tr><td>${escapeHtml(m.date)}<br>${escapeHtml(m.home)} – ${escapeHtml(m.away)}${m.pen?' · TAB':''}${m.aet?' · AET':''}</td><td>${m.g1}–${m.g2}</td><td>${gf===null?'—':gf+'–'+ga}</td><td>${/^[WLD]$/.test(outcome)?`<span class="result ${outcome}">${outcome}</span>`:'—'}</td></tr>`;
+ }).join('')+'</tbody></table>';
+}
+function isoDate(s){const m=s.match(/^(\d{2})\.(\d{2})\.(\d{2,4})$/);if(!m)return null;const y=Number(m[3].length===2?'20'+m[3]:m[3]),mo=Number(m[2]),d=Number(m[1]),x=new Date(Date.UTC(y,mo-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()===mo-1&&x.getUTCDate()===d?x.toISOString().slice(0,10):null}
+const keyOf=m=>[m.iso,norm(m.home),norm(m.away)].join('|');
+function fixturePool(extra=[]){
+ const pool=new Map();
+ for(const source of extra)for(const m of parse(source.raw,source.team,source.other||'').matches){m.iso=isoDate(m.date);if(m.iso&&!pool.has(keyOf(m)))pool.set(keyOf(m),m)}
+ return [...pool.values()].sort((a,b)=>a.iso.localeCompare(b.iso));
+}
+const ageDays=(iso,cutoff)=>(Date.parse(cutoff+'T00:00:00Z')-Date.parse(iso+'T00:00:00Z'))/86400000;
+const timeWeight=(m,cutoff,halfLife)=>Math.pow(0.5,ageDays(m.iso,cutoff)/halfLife);
+const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+function forecast(home,away,cutoff,pool,halfLife,neutral=false,ratings=null){
+ const prior=pool.filter(m=>m.iso<cutoff&&!m.aet),h=norm(home),a=norm(away),teamMatches=t=>prior.filter(m=>norm(m.home)===t||norm(m.away)===t);
+ const hm=teamMatches(h),am=teamMatches(a);
+ if(hm.length<3||am.length<3)return {missing:true,nA:hm.length,nB:am.length,available:prior.length};
+ const homeMean=(20*1.45+prior.reduce((s,m)=>s+m.g1,0))/(20+prior.length),awayMean=(20*1.25+prior.reduce((s,m)=>s+m.g2,0))/(20+prior.length),reference=(homeMean+awayMean)/2;
+ const stats=new Map();
+ for(const team of new Set(prior.flatMap(m=>[norm(m.home),norm(m.away)]))){const list=teamMatches(team);stats.set(team,{count:list.length,scored:list.reduce((s,m)=>s+(norm(m.home)===team?m.g1:m.g2),0)/list.length,conceded:list.reduce((s,m)=>s+(norm(m.home)===team?m.g2:m.g1),0)/list.length})}
+ const strength=(team,venue,forGoals)=>{
+  const rows=teamMatches(team).map(m=>{const isHome=norm(m.home)===team,opp=stats.get(norm(isHome?m.away:m.home)),goals=isHome?(forGoals?m.g1:m.g2):(forGoals?m.g2:m.g1),rawFactor=opp&&opp.count>=3?clamp(reference/Math.max(0.35,forGoals?opp.conceded:opp.scored),0.6,1.6):1,factor=opp?1+(rawFactor-1)*opp.count/(opp.count+8):1;return {value:goals*factor,w:timeWeight(m,cutoff,halfLife),site:isHome?'home':'away'}});
+  const summary=arr=>{const w=arr.reduce((s,x)=>s+x.w,0);return {w,value:w?arr.reduce((s,x)=>s+x.value*x.w,0)/w:reference}};
+  const all=summary(rows),site=summary(rows.filter(x=>x.site===venue)),share=neutral?0:site.w/(site.w+2),observed=(1-share)*all.value+share*site.value,baseline=neutral?reference:(venue==='home'?(forGoals?homeMean:awayMean):(forGoals?awayMean:homeMean));
+  return (observed*all.w+baseline*2)/(all.w+2);
+ };
+ const h2h=prior.filter(m=>(norm(m.home)===h&&norm(m.away)===a)||(norm(m.home)===a&&norm(m.away)===h));
+ const weighted=h2h.map(m=>({m,w:timeWeight(m,cutoff,halfLife)})),effective=weighted.reduce((s,x)=>s+x.w,0),hShare=0.2*effective/(effective+3);
+ const hGoals=team=>effective?weighted.reduce((s,{m,w})=>s+w*(norm(m.home)===team?m.g1:m.g2),0)/effective:0;
+ const baselineHome=neutral?reference:homeMean,baselineAway=neutral?reference:awayMean;
+ const attackingHome=strength(h,'home',true),concedingAway=strength(a,'away',false);
+ const attackingAway=strength(a,'away',true),concedingHome=strength(h,'home',false);
+ const baseHome=attackingHome*concedingAway/baselineHome,baseAway=attackingAway*concedingHome/baselineAway;
+ const weightedWins=weighted.reduce((s,{m,w})=>s+w*Number((norm(m.home)===h?m.g1:m.g2)>(norm(m.home)===h?m.g2:m.g1)),0);
+ const weightedLosses=weighted.reduce((s,{m,w})=>s+w*Number((norm(m.home)===h?m.g1:m.g2)<(norm(m.home)===h?m.g2:m.g1)),0);
+ const h2hTilt=0.25*(weightedWins-weightedLosses)/(effective+3);
+ let la=clamp(((1-hShare)*baseHome+hShare*hGoals(h))*Math.exp(h2hTilt/2),0.15,5);
+ let lb=clamp(((1-hShare)*baseAway+hShare*hGoals(a))*Math.exp(-h2hTilt/2),0.15,5);
+ let ratingWeight=0,fifaExpectation=null;
+ if(ratings?.valid){
+  const effectiveA=hm.reduce((s,m)=>s+timeWeight(m,cutoff,halfLife),0),effectiveB=am.reduce((s,m)=>s+timeWeight(m,cutoff,halfLife),0);
+  ratingWeight=10/(10+Math.min(effectiveA,effectiveB));
+  fifaExpectation=1/(1+10**(-(ratings.home-ratings.away+(ratings.adv||0))/(ratings.scale||600)));
+  const recent=probs(la,lb).outcomes,goalTotal=la+lb;
+  const desired=ratingWeight*fifaExpectation+(1-ratingWeight)*(recent[0]+recent[1]/2);
+  let low=-4,high=4;
+  for(let i=0;i<36;i++){
+   const mid=(low+high)/2,share=1/(1+Math.exp(-mid)),p=probs(goalTotal*share,goalTotal*(1-share)).outcomes;
+   if(p[0]+p[1]/2<desired)low=mid;else high=mid;
+  }
+  const share=1/(1+Math.exp(-(low+high)/2));la=goalTotal*share;lb=goalTotal*(1-share);
+ }
+ const bothScored=m=>m.g1>0&&m.g2>0;
+ const bttsHistory={home:hm.filter(bothScored).length,away:am.filter(bothScored).length,all:prior.filter(bothScored).length,total:prior.length};
+ const goalHistory=[0,1,2,3,4,5].map(line=>prior.filter(m=>m.g1+m.g2>=line+1).length);
+ const zeroes=prior.filter(m=>m.g1===0&&m.g2===0).length;
+ const rho=prior.length>=80?clamp((1-(zeroes/prior.length)/Math.exp(-homeMean-awayMean))/(homeMean*awayMean),-0.08,Math.min(0.08,0.9/(la*lb))):0;
+ const duel=weighted.map(({m,w})=>{const g1=norm(m.home)===h?m.g1:m.g2,g2=norm(m.home)===h?m.g2:m.g1;return {outcome:g1>g2?'W':g1<g2?'L':'D',w}});
+ const known=[...hm,...am].filter(m=>{const t=norm(m.home)===h||norm(m.home)===a?norm(m.away):norm(m.home);return (stats.get(t)?.count||0)>=3}).length;
+ const form=(list,team)=>{const w=list.reduce((s,m)=>s+timeWeight(m,cutoff,halfLife),0);return {scored:list.reduce((s,m)=>s+timeWeight(m,cutoff,halfLife)*(norm(m.home)===team?m.g1:m.g2),0)/w,conceded:list.reduce((s,m)=>s+timeWeight(m,cutoff,halfLife)*(norm(m.home)===team?m.g2:m.g1),0)/w}};
+ return {...probs(la,lb,rho),counts:['W','D','L'].map(x=>duel.filter(y=>y.outcome===x).length),weight:0.25*effective/(effective+3),lambdaA:la,lambdaB:lb,rho,h2hCount:h2h.length,nA:hm.length,nB:am.length,available:prior.length,opponentCoverage:known,bttsHistory,goalHistory,formA:form(hm,h),formB:form(am,a),ratingWeight,fifaExpectation};
+}
+function probs(lambdaA,lambdaB,rho=0){
+ const dist=l=>{let p=Math.exp(-l),a=[p];for(let i=1;i<=25;i++){p*=l/i;a.push(p)}return a};
+ const a=dist(lambdaA),b=dist(lambdaB);let win=0,draw=0,loss=0,marginHome=0,marginAway=0,bttsYes=0,exact=[];
+ for(let i=0;i<a.length;i++)for(let j=0;j<b.length;j++){
+  const tau=i===0&&j===0?1-lambdaA*lambdaB*rho:i===0&&j===1?1+lambdaA*rho:i===1&&j===0?1+lambdaB*rho:i===1&&j===1?1-rho:1;
+  const p=a[i]*b[j]*tau,outcome=i>j?0:i===j?1:2;exact.push({a:i,b:j,p,outcome});if(i>j)win+=p;else if(i===j)draw+=p;else loss+=p;if(i-j>=2)marginHome+=p;if(j-i>=2)marginAway+=p;if(i>0&&j>0)bttsYes+=p;
+ }
+ const total=win+draw+loss,adjusted=exact.map(x=>({...x,p:x.p/total}));
+ const bestWin=[adjusted.filter(x=>x.a>x.b).sort((x,y)=>y.p-x.p)[0],adjusted.filter(x=>x.b>x.a).sort((x,y)=>y.p-x.p)[0]];
+ const goalOvers=[0,1,2,3,4,5].map(line=>adjusted.reduce((sum,x)=>sum+(x.a+x.b>=line+1?x.p:0),0));
+ const handicap=[1,2,3,4].map(n=>[adjusted.reduce((sum,x)=>sum+(x.a-x.b>=n?x.p:0),0),adjusted.reduce((sum,x)=>sum+(x.b-x.a>=n?x.p:0),0)]);
+ return {outcomes:[win/total,draw/total,loss/total],margins:[marginHome/total,marginAway/total],bttsYes:bttsYes/total,goalOvers,handicap,bestWin,zeroZero:adjusted.find(x=>x.a===0&&x.b===0).p,exact:[...adjusted].sort((x,y)=>y.p-x.p).slice(0,8),grid:adjusted.filter(x=>x.a<=4&&x.b<=4).sort((x,y)=>x.a-y.a||x.b-y.b)};
+}
+const statLabels=['corner domicile','corner extérieur','carton jaune domicile','carton jaune extérieur','carton rouge domicile','carton rouge extérieur'];
+function statBlocks(fields,matches,cutoff,team){
+ const ordered=matches.filter(m=>isoDate(m.date)).sort((a,b)=>isoDate(b.date).localeCompare(isoDate(a.date))).slice(0,5);
+ const errors=[],data=[];
+ const normalized=x=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+ if(fields.some(x=>x.trim())&&ordered.length<5)errors.push(`${team} : seulement ${ordered.length}/5 matchs reconnus dans les résultats ; vérifie les cinq dates et scores collés plus haut.`);
+ if(fields.some(x=>x.trim())&&ordered.some(m=>isoDate(m.date)>=cutoff))errors.push(`${team} : un match date du jour prévu ou d’après ; règle la date du match à prévoir.`);
+ if(fields.some(x=>x.trim())&&ordered.some(m=>m.aet))errors.push(`${team} : un des cinq matchs est marqué AET ; les statistiques peuvent inclure la prolongation, vérifie que tes six chiffres portent sur 90 minutes.`);
+ fields.forEach((raw,i)=>{
+  if(!raw.trim())return;
+  const values=Array(6).fill(null),pairs=[...raw.matchAll(/(\d+|-)\s*\(\s*([^)]*?)\s*\)/g)];
+  const numbers=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(x=>x.match(/^(?:\*\*)?(\d+)(?:\*\*)?$/));
+  if(!pairs.length&&numbers.length&&numbers.every(Boolean))numbers.slice(0,6).forEach((x,j)=>values[j]=Number(x[1]));
+  for(const pair of pairs){
+   const label=normalized(pair[2]).replace(/\bcorners\b/g,'corner').replace(/\bcartons\b/g,'carton').replace(/\bjaunes\b/g,'jaune').replace(/\brouges\b/g,'rouge');
+   const index=statLabels.findIndex(expected=>normalized(expected)===label);
+   if(index<0||values[index]!==null||Number(pair[1])>100){errors.push(`${team}, match ${i+1} : libellé ou valeur en double non reconnu (${pair[2]}).`);continue}
+   values[index]=pair[1]==='-'?null:Number(pair[1]);
+  }
+  const missing=statLabels.filter((_,j)=>values[j]===null);
+  if(missing.length)errors.push(`${team}, match ${i+1} : ${6-missing.length}/6 valeurs reconnues ; manque ${missing.join(', ')}.`);
+  if([0,2,4].every(j=>values[j]===null||values[j+1]===null))return;
+  const m=ordered[i],date=m?.date||null;
+  data.push({key:m?[isoDate(m.date),norm(m.home),norm(m.away)].join('|'):`${norm(team)}|case-${i+1}`,date,home:m?.home||team,away:m?.away||'adversaire non reconnu',corners:values[0]===null||values[1]===null?null:values[0]+values[1],cards:values[2]===null||values[3]===null?null:values[2]+values[3],reds:values[4]===null||values[5]===null?null:values[4]+values[5]});
+ });
+ return {data:data.filter(row=>!row.date||isoDate(row.date)<cutoff),errors,ordered};
+}
+function renderStatFields(ordered,prefix,team){
+ for(let i=0;i<5;i++){
+  const m=ordered[i],opponent=m?(norm(m.home)===norm(team)?m.away:m.home):null;
+  const place=m?(norm(m.home)===norm(team)?'à domicile':'à l’extérieur'):'';
+  $(`${prefix}${i}`).previousElementSibling.textContent=m?`Match ${i+1} · ${m.date} · contre ${opponent} (${place})`:`Match ${i+1} · adversaire non reconnu (tu peux quand même coller les six statistiques)`;
+ }
+}
+function extraTable(data,key,lines){
+ const title=key==='cards'?'Cartons jaunes':key==='reds'?'Cartons rouges':'Corners';
+ const samples=data.filter(x=>x[key]!==null),n=samples.length;
+ if(!n)return `<section class="market-card"><h3>${title}</h3><p class="sample">En attente de statistiques pour les deux équipes.</p></section>`;
+ const pct=x=>(x*100).toFixed(1).replace('.',',')+' %';
+ const rows=lines.map(line=>{
+  const k=samples.filter(x=>x[key]>line).length,p=(k+1)/(n+2);
+  return `<tr><td><b>${String(line).replace('.',',')}</b></td><td><span class="pct over">${pct(p)}</span><div class="bar"><span style="width:${(p*100).toFixed(1)}%"></span></div></td><td><span class="pct under">${pct(1-p)}</span><div class="bar"><span style="width:${((1-p)*100).toFixed(1)}%;background:#477fb6"></span></div></td><td class="past">${k} sur ${n}</td></tr>`;
+ }).join('');
+ return `<section class="market-card"><h3>${title} · total des deux équipes</h3><p class="sample">${n} match${n>1?'s':''} distinct${n>1?'s':''} utilisé${n>1?'s':''}${n<8?' · Peu de données, estimation très incertaine':''}</p><table><thead><tr><th>Ligne</th><th>Plus de</th><th>Moins de</th><th>Plus observé</th></tr></thead><tbody>${rows}</tbody></table></section>`;
+}
+const scoreTier=p=>p>0.10?'tier-high':p>=0.07?'tier-good':p>=0.05?'tier-medium':p>=0.03?'tier-low':'tier-verylow';
+function update(){
+ const home=$('home').value.trim(),away=$('away').value.trim(),cutoff=$('matchDate').value;
+ const ratings=ratingsFor(home,away,cutoff);
+ $('ratingInfo').textContent=ratings.valid?`${ratings.source} : ${home} ${ratings.home.toFixed(2)} points${ratings.rankHome?' (rang '+ratings.rankHome+')':''} · ${away} ${ratings.away.toFixed(2)} points${ratings.rankAway?' (rang '+ratings.rankAway+')':''}. Les valeurs manuelles ne sont pas enregistrées.`:ratings.incomplete?'Saisis deux valeurs valides entre 400 et 2 500 points ; référence ignorée.':ratings.source==='Référence FIFA désactivée'?'Classement FIFA désactivé pour ce match.':`Référence FIFA indisponible${ratings.missing?' : '+ratings.missing:''}. Vérifie les noms, la date du classement et les points manuels.`;
+ $('titleHome').textContent=home||'Domicile';$('titleAway').textContent=away||'Extérieur';$('titleH2h').textContent=`Confrontations (vue ${home||'domicile'})`;
+ const a=parse($('recentHome').value,home,away),b=parse($('recentAway').value,away,home),h=parse($('h2h').value,home,away);
+ $('tableHome').innerHTML=table(a.matches,home);$('tableAway').innerHTML=table(b.matches,away);$('tableH2h').innerHTML=table(h.matches,home);
+ const homeFields=Array.from({length:5},(_,i)=>$('statHome'+i).value),awayFields=Array.from({length:5},(_,i)=>$('statAway'+i).value);
+ const sh=statBlocks(homeFields,a.matches,cutoff,home||'Domicile'),sa=statBlocks(awayFields,b.matches,cutoff,away||'Extérieur');
+ $('statsHomeTitle').textContent=home||'Équipe à domicile';$('statsAwayTitle').textContent=away||'Équipe à l’extérieur';
+ renderStatFields(sh.ordered,'statHome',home);renderStatFields(sa.ordered,'statAway',away);
+ const extras=new Map(),statErrors=[...sh.errors,...sa.errors];
+ for(const row of [...sh.data,...sa.data]){const old=extras.get(row.key);if(old&&['corners','cards','reds'].some(k=>old[k]!==null&&row[k]!==null&&old[k]!==row[k])){statErrors.push(`${row.date} ${row.home} – ${row.away} : valeurs contradictoires ; ce match est exclu.`);extras.delete(row.key)}else if(old){for(const k of ['corners','cards','reds'])if(old[k]===null)old[k]=row[k]}else extras.set(row.key,row)}
+ $('statsInfo').textContent=`Matchs valides : ${sh.data.length}/5 pour ${home||'domicile'} et ${sa.data.length}/5 pour ${away||'extérieur'}. `+(statErrors.join(' · ')||'Résultats ci-dessous. Si une case n’est pas reconnue, vérifie son message ici.');
+ const statsData=[...extras.values()];
+ const byMarket=key=>sh.data.some(x=>x[key]!==null)&&sa.data.some(x=>x[key]!==null)?statsData:[];
+ $('extras').innerHTML=extraTable(byMarket('cards'),'cards',[3.5,4.5,5.5])+extraTable(byMarket('corners'),'corners',[5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5])+extraTable(byMarket('reds'),'reds',[0.5,1.5,2.5])+`<p class="market-help">Exemple : sur la ligne 4,5, « Plus de » = au moins 5 cartons ; « Moins de » = au plus 4. Les pourcentages sont des estimations lissées ; « Plus observé » compte les anciens matchs. Les rouges sont distincts des jaunes.</p>`;
+{const ax=autoCounts(home,away,cutoff,Number($('halfLife').value));$('autoMarkets').innerHTML=statsData.length?$('extras').innerHTML:ax.html}
+ const bothClubs=auto.teams.get(norm(home))?.kind==='club'&&auto.teams.get(norm(away))?.kind==='club';
+ const issues=[...a.problems.map(x=>'Domicile : '+x),...b.problems.map(x=>'Extérieur : '+x),...h.problems.map(x=>'Duels : '+x)];
+ for(const [set,team,label] of [[a,home,'Domicile'],[b,away,'Extérieur']])for(const m of set.matches)if(norm(m.home)!==norm(team)&&norm(m.away)!==norm(team))issues.push(`${label}, ${m.date} : équipe absente du match`);
+ for(const m of h.matches)if(![m.home,m.away].some(x=>norm(x)===norm(home))||![m.home,m.away].some(x=>norm(x)===norm(away)))issues.push(`Duels, ${m.date} : équipes inattendues`);
+ if([...a.matches,...b.matches,...h.matches].some(m=>m.aet))issues.push('Matchs AET exclus : score à 90 minutes inconnu.');
+ if([...a.matches,...b.matches,...h.matches].some(m=>m.pen))issues.push('Tirs au but ignorés : score avant la séance conservé.');
+ const valid=home&&away&&norm(home)!==norm(away)&&/^\d{4}-\d\d-\d\d$/.test(cutoff)&&!issues.some(x=>x.includes('équipe absente')||x.includes('équipes inattendues'));
+ const pool=fixturePool([{raw:$('recentHome').value,team:home},{raw:$('recentAway').value,team:away},{raw:$('h2h').value,team:home,other:away}]);
+ const prediction=valid?forecast(home,away,cutoff,pool,Number($('halfLife').value),$('neutral').checked,ratings):{missing:true,nA:0,nB:0};
+ if(prediction.missing){
+  ['p1','px','p2'].forEach(x=>$(x).textContent='—');$('goals').textContent='';$('diagnostic').hidden=true;$('winningScores').hidden=true;$('btts').hidden=true;$('totals').hidden=true;$('handicap').hidden=true;$('favorite').hidden=true;document.querySelectorAll('.score').forEach(x=>x.classList.remove('leader'));$('form').hidden=true;$('h2hStats').hidden=true;$('liveBar').hidden=true;
+  $('exact').textContent='En attente des résultats.';$('exact').className='exact-grid empty';$('matrix').textContent='En attente des résultats.';$('matrix').className='score-matrix empty';
+  $('status').className='status warn';$('status').textContent=(!valid?'Saisir deux équipes, une date de match et vérifier les noms. ':`Matchs admissibles avant le ${cutoff} : ${prediction.nA}/3 pour ${home}, ${prediction.nB}/3 pour ${away}. `)+issues.join(' · ');return;
+ }
+ ['p1','px','p2'].forEach((id,i)=>$(id).textContent=(prediction.outcomes[i]*100).toFixed(1).replace('.',',')+' %');
+ {const pc=i=>(prediction.outcomes[i]*100).toFixed(1).replace('.',',')+' %';$('liveBar').hidden=false;$('liveText').textContent=`${home} ${pc(0)} · Nul ${pc(1)} · ${away} ${pc(2)}`}
+ const order=[0,1,2].sort((i,j)=>prediction.outcomes[j]-prediction.outcomes[i]);
+ const leader=order[0],gap=100*(prediction.outcomes[leader]-prediction.outcomes[order[1]]);
+ const label=leader===0?home:leader===2?away:'le match nul';
+ const grade=gap>=15?'Avantage marqué':gap>=7?'Avantage modéré':'Match serré';
+ const caution=prediction.nA<8||prediction.nB<8?'Échantillon réduit : classement fragile.':prediction.opponentCoverage<6?'Niveau des adversaires peu documenté.':'Lecture fondée sur les matchs fournis.';
+ const f=$('favorite');f.hidden=false;f.className='favorite '+(gap>=15?'clear':gap<7?'tight':'');
+ f.innerHTML=`<strong>${grade} : ${escapeHtml(label)} (${(100*prediction.outcomes[leader]).toFixed(1).replace('.',',')} %)</strong><small>Écart avec l’issue suivante : ${gap.toFixed(1).replace('.',',')} points de pourcentage. ${caution}${ratings.valid?' Note de force (Elo ou FIFA) prise en compte.':bothClubs?'':' Note de force absente : comparaison de force incomplète.'} Ces seuils aident à lire le calcul ; ils ne mesurent pas sa fiabilité réelle.</small>`;
+ document.querySelectorAll('.score').forEach((x,i)=>x.classList.toggle('leader',i===leader));
+ $('diagnostic').hidden=false;
+ const percent=x=>(100*x).toFixed(1).replace('.',',')+' %';
+ const historic=prediction.bttsHistory;
+ $('btts').hidden=false;
+ $('btts').innerHTML=`<b>Les deux équipes marquent :</b> Oui ${percent(prediction.bttsYes)} · Non ${percent(1-prediction.bttsYes)}.<br><small>Fréquence observée parmi les matchs collés, avant la date prévue : ${historic.all}/${historic.total} (${percent(historic.all/historic.total)}) ; ${escapeHtml(home)} ${historic.home}/${prediction.nA} · ${escapeHtml(away)} ${historic.away}/${prediction.nB}. Chaque rencontre est comptée une seule fois. Cette fréquence passée n’est pas un taux de réussite des prévisions.</small>`;
+ $('totals').hidden=false;
+ $('totals').innerHTML=`<b>Total de buts · 90 minutes</b><div class="compact-scroll"><table class="goal-table"><thead><tr><th>Ligne</th><th>Plus de</th><th>Moins de</th><th>Plus observé</th></tr></thead><tbody>${prediction.goalOvers.map((over,index)=>`<tr><td><b>${index},5 buts</b></td><td><strong class="up">${percent(over)}</strong></td><td><strong class="down">${percent(1-over)}</strong></td><td class="historic">${prediction.goalHistory[index]} sur ${prediction.available}</td></tr>`).join('')}</tbody></table></div><small>Sur la ligne 2,5 : « Plus de » = au moins 3 buts ; « Moins de » = au plus 2. La dernière colonne montre les matchs passés.</small>`;
+ $('handicap').hidden=false;
+ $('handicap').innerHTML=`<b>Handicap · victoire avec au moins N buts d’écart</b><div class="compact-scroll"><table class="handicap-table"><thead><tr><th>Écart minimal</th><th>${escapeHtml(home)}</th><th>${escapeHtml(away)}</th></tr></thead><tbody>${prediction.handicap.map((row,i)=>`<tr><td><b>${i+1} but${i?'s':''} d’écart</b> <span class="historic">(handicap −${String(i+0.5).replace('.',',')})</span></td><td><strong class="up">${percent(row[0])}</strong></td><td><strong class="up">${percent(row[1])}</strong></td></tr>`).join('')}</tbody></table></div><small>Lecture : « 2 buts d’écart » = victoire par au moins 2 buts (handicap −1,5), ce qui inclut 2–0, 3–1, 3–0… Le handicap +1,5 de l’autre équipe se calcule par 1 − ce pourcentage. Pour un handicap asiatique de −2, une victoire par exactement 2 buts peut être remboursée.</small>`;
+ $('winningScores').hidden=false;
+ $('winningScores').innerHTML=`<b>Scores gagnants les plus probables :</b><div class="row" style="margin-top:8px"><div><strong>${escapeHtml(home)} : ${prediction.bestWin[0].a}–${prediction.bestWin[0].b}</strong> · ${percent(prediction.bestWin[0].p)} du total des matchs<br><small>Victoire de ${escapeHtml(home)} : ${percent(prediction.outcomes[0])} · par au moins 2 buts : ${percent(prediction.margins[0])}</small></div><div><strong>${escapeHtml(away)} : ${prediction.bestWin[1].a}–${prediction.bestWin[1].b}</strong> · ${percent(prediction.bestWin[1].p)} du total des matchs<br><small>Victoire de ${escapeHtml(away)} : ${percent(prediction.outcomes[2])} · par au moins 2 buts : ${percent(prediction.margins[1])}</small></div></div><small>Un 0–0 ou un 1–1 peut rester le score isolé le plus probable : chaque victoire additionne plusieurs scores. Le pourcentage indiqué après un score gagnant est sa probabilité absolue, pas une probabilité conditionnelle.</small>`;
+ const goalTotal=prediction.lambdaA+prediction.lambdaB;
+ $('diagnostic').innerHTML=`<b>Lecture des scores :</b> 0–0 ${percent(prediction.zeroZero)} · total attendu ${goalTotal.toFixed(2).replace('.',',')} but(s). Victoire par au moins deux buts : ${escapeHtml(home)} ${percent(prediction.margins[0])} · ${escapeHtml(away)} ${percent(prediction.margins[1])}. <br>${ratings.valid?`Note de force (Elo ou FIFA) appliquée (${Math.round(prediction.ratingWeight*100)} % du calcul de l’écart entre équipes) : ils ne modifient pas le total de buts attendu.`:(bothClubs?'':'<b>Note de force non appliquée :</b> disponible automatiquement pour deux sélections nationales de la base ; sinon renseigne les points dans les options avancées.')} Un score exact isolé peut être le plus probable même si son issue ne l’est pas.`;
+ $('form').hidden=false;
+ $('form').innerHTML=`<b>Forme observée, pondérée par date :</b> ${escapeHtml(home)} ${prediction.formA.scored.toFixed(2).replace('.',',')} but(s) marqué(s) / ${prediction.formA.conceded.toFixed(2).replace('.',',')} encaissé(s) ; ${escapeHtml(away)} ${prediction.formB.scored.toFixed(2).replace('.',',')} marqué(s) / ${prediction.formB.conceded.toFixed(2).replace('.',',')} encaissé(s) par match.`;
+ $('h2hStats').hidden=!prediction.h2hCount;
+ if(prediction.h2hCount)$('h2hStats').innerHTML=`<b>Face à face (${prediction.h2hCount} matchs) :</b> ${escapeHtml(home)} ${prediction.counts[0]} victoire(s) · ${prediction.counts[1]} nul(s) · ${escapeHtml(away)} ${prediction.counts[2]} victoire(s). Coefficient maximal d’ajustement de l’écart de buts : ${(prediction.weight*100).toFixed(1).replace('.',',')} %.`;
+ $('exact').className='exact-grid';$('exact').innerHTML=prediction.exact.map(x=>`<div class="exact-item ${scoreTier(x.p)}"><b>${x.a} – ${x.b}</b><span>${(x.p*100).toFixed(1).replace('.',',')} %</span></div>`).join('');
+ $('matrix').className='score-matrix';$('matrix').innerHTML=prediction.grid.map(x=>`<div class="exact-item ${scoreTier(x.p)}"><b>${x.a} – ${x.b}</b><span>${(x.p*100).toFixed(1).replace('.',',')} %</span></div>`).join('');
+ $('goals').textContent=`Buts attendus : ${home} ${prediction.lambdaA.toFixed(2).replace('.',',')} · ${away} ${prediction.lambdaB.toFixed(2).replace('.',',')}. Historique : ${prediction.nA} et ${prediction.nB} matchs ; ${prediction.available} matchs distincts. Adversaires connus : ${prediction.opponentCoverage} observations. ${ratings.valid?`Note de force dans l’estimation : ${(prediction.ratingWeight*100).toFixed(0)} %. `:''}Correction petits scores : ${prediction.rho?'active':'inactive (moins de 80 matchs)'}.`;
+ $('status').className='status'+(issues.length?' warn':'');$('status').textContent=`Calcul sur les matchs antérieurs au ${cutoff}.`+(issues.length?' À vérifier : '+issues.join(' · '):' Vérifie les scores reconnus ci-dessous.');
+}
+const dbKey='pronostic-football-team-names-v3';
+const oldDbKey='pronostic-football-local-v2';
+let db={version:3,teams:[]};
+try{
+ const saved=JSON.parse(localStorage.getItem(dbKey)||'null');
+ if(saved?.version===3&&Array.isArray(saved.teams))db.teams=saved.teams.filter(x=>typeof x==='string');
+ // One-time migration: retain names only; delete the former match-history record.
+ const legacy=JSON.parse(localStorage.getItem(oldDbKey)||'null');
+ if(legacy?.teams)db.teams.push(...Object.values(legacy.teams).map(x=>x?.name).filter(x=>typeof x==='string'));
+ localStorage.removeItem(oldDbKey);
+ db.teams=[...new Map(db.teams.map(x=>[norm(x),x.trim()]).filter(([key])=>key)).values()];
+ localStorage.setItem(dbKey,JSON.stringify(db));
+}catch{}
+try{localStorage.removeItem(oldDbKey)}catch{}
+function dbStatus(message=''){
+ const teams=[...db.teams].sort((a,b)=>a.localeCompare(b));
+ $('dbInfo').textContent=`${teams.length} équipe(s) enregistrée(s). ${teams.length?'Équipes : '+teams.join(', '):''}`;
+ $('knownTeams').innerHTML=[...new Map([...teams,...fifaDb.teams.map(x=>x.name),...autoNames()].map(name=>[norm(name),name])).values()].map(name=>`<option value="${escapeHtml(name)}"></option>`).join('');
+ $('dbMessage').textContent=message;
+}
+function persist(){try{localStorage.setItem(dbKey,JSON.stringify(db));return true}catch{return false}}
+$('save').onclick=()=>{
+ const names=[$('home').value.trim(),$('away').value.trim()].filter(Boolean);
+ if(!names.length){dbStatus('Saisis au moins un nom d’équipe.');return}
+ db.teams=[...new Map([...db.teams,...names].map(x=>[norm(x),x])).values()];
+ const kept=persist();dbStatus(kept?'Noms enregistrés. Aucun résultat de match n’a été conservé.':'Stockage indisponible : exporte les noms pour les conserver.');
+};
+$('export').onclick=()=>{
+ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+ link.href=url;link.download='equipes_football_noms.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);dbStatus('Liste des noms téléchargée.');
+};
+$('import').onclick=()=>$('importFile').click();
+$('importFile').onchange=async event=>{
+ const file=event.target.files?.[0];if(!file)return;
+ try{
+  const incoming=JSON.parse(await file.text());
+  let names=[];
+  if(incoming.version===3&&Array.isArray(incoming.teams))names=incoming.teams;
+  else if(incoming.version===2&&incoming.teams&&typeof incoming.teams==='object')names=Object.values(incoming.teams).map(x=>x?.name);
+  else throw Error('Format de liste non reconnu');
+  names=names.filter(x=>typeof x==='string'&&norm(x));
+  db.teams=[...new Map([...db.teams,...names].map(x=>[norm(x),x.trim()])).values()];
+  const kept=persist();dbStatus(`${names.length} nom(s) lus ; aucun score n’a été importé. ${kept?'':'Exporte les noms : stockage navigateur indisponible.'}`);
+ }catch(e){dbStatus('Import impossible : '+e.message)}event.target.value='';
+};
+$('clear').onclick=()=>{
+ for(const id of ['home','away','recentHome','recentAway','h2h','ratingHome','ratingAway',...statFieldIds])$(id).value='';
+ $('matchDate').value=new Date().toLocaleDateString('sv-SE');$('halfLife').value='365';$('neutral').checked=false;$('useFifa').checked=true;$('apiHome').value='';$('apiAway').value='';for(const id of ['apiQueryHome','apiQueryAway','apiHomeId','apiAwayId'])$(id).value='';
+ $('dbMessage').textContent='Saisie effacée. Les noms et le classement FIFA enregistrés restent disponibles.';
+ update();autoFill();
+};
+const statFieldIds=[];
+for(const [container,prefix] of [['statHomeFields','statHome'],['statAwayFields','statAway']]){
+ for(let i=0;i<5;i++){
+  const id=prefix+i;statFieldIds.push(id);
+  const block=document.createElement('div');block.className='stat-entry';
+  const label=document.createElement('label');label.htmlFor=id;label.textContent=`Match ${i+1}`;
+  const input=document.createElement('textarea');input.id=id;input.spellcheck=false;input.placeholder='3 (corner domicile)\n4 (corner extérieur)\n0 (carton jaune domicile)\n0 (carton jaune extérieur)\n0 (carton rouge domicile)\n0 (carton rouge extérieur)';
+  block.append(label,input);$(container).append(block);
+ }
+}
+const apiBase='https://v3.football.api-sports.io/';
+let apiBusy=false;const apiCache=new Map();
+async function apiRequestOnce(endpoint,params={}){
+ const key=$('apiKey').value.trim();if(!key)throw Error('Colle ta clé API-Sports dans la case prévue.');
+ const url=new URL(endpoint,apiBase);for(const [name,value] of Object.entries(params))url.searchParams.set(name,value);
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),25000);
+ try{
+  const response=await fetch(url,{headers:{'x-apisports-key':key},signal:controller.signal});
+  if(response.status===429)throw Object.assign(Error('API : trop de requêtes par minute.'),{rateLimited:true});
+  if(!response.ok)throw Error(`API : erreur HTTP ${response.status}. Vérifie ta clé et ton quota.`);
+  const body=await response.json();
+  if(body.errors&&Object.keys(body.errors).length){
+   if(Object.keys(body.errors).includes('rateLimit'))throw Object.assign(Error('API : trop de requêtes par minute.'),{rateLimited:true});
+   throw Error('API : '+Object.values(body.errors).join(' · '));
+  }
+  if(!Array.isArray(body.response)&&endpoint!=='status')throw Error('Réponse API inattendue.');
+  return body;
+ }catch(error){if(error.name==='AbortError')throw Error('Délai de connexion dépassé. Réessaie.');if(error instanceof TypeError)throw Error('Connexion API impossible depuis ce navigateur : vérifie Internet et les restrictions de domaine dans ton compte API-Sports.');throw error}
+ finally{clearTimeout(timeout)}
+}
+// L'offre gratuite limite à 10 requêtes par minute : en cas de dépassement, on attend puis on réessaie automatiquement.
+async function apiRequest(endpoint,params={}){
+ for(let attempt=0;;attempt++){
+  try{return await apiRequestOnce(endpoint,params)}
+  catch(error){
+   if(!error.rateLimited||attempt>=3)throw error;
+   for(let left=62;left>0;left--){$('apiStatus').textContent=`Limite de requêtes par minute atteinte : reprise automatique dans ${left} s…`;await new Promise(r=>setTimeout(r,1000))}
+  }
+ }
+}
+async function apiAction(work){
+ if(apiBusy)return;apiBusy=true;for(const id of ['apiTest','apiSearch','apiLoad','apiFindHome','apiFindAway'])$(id).disabled=true;
+ try{await work()}catch(error){$('apiStatus').textContent=error.message}
+ finally{apiBusy=false;for(const id of ['apiTest','apiSearch','apiLoad','apiFindHome','apiFindAway'])$(id).disabled=false}
+}
+function apiTeamOptions(select,teams,query){
+ select.innerHTML='<option value="">'+(teams.length?'Choisis la bonne équipe':'Aucun résultat')+'</option>'+teams.map(x=>`<option value="${x.team.id}" data-name="${escapeHtml(x.team.name)}">${escapeHtml(x.team.name)} · ${escapeHtml(x.team.country||'')} · ${x.team.national?'sélection':'club'} · ID ${x.team.id}</option>`).join('');
+ select.disabled=!teams.length;
+ const exact=teams.filter(x=>norm(x.team.name)===norm(query));
+ select.value=teams.length===1?String(teams[0].team.id):exact.length===1?String(exact[0].team.id):'';
+}
+const apiFrenchNames={paysdegalles:'Wales',danemark:'Denmark',angleterre:'England',espagne:'Spain',allemagne:'Germany',belgique:'Belgium',italie:'Italy',turquie:'Turkey',norvege:'Norway',suede:'Sweden',suisse:'Switzerland',paysbas:'Netherlands',grece:'Greece',bulgarie:'Bulgaria',maroc:'Morocco',algerie:'Algeria',tunisie:'Tunisia',bresil:'Brazil',argentine:'Argentina',etatsunis:'USA',coreedusud:'South Korea',japon:'Japan',irlande:'Ireland',ecosse:'Scotland',pologne:'Poland',autriche:'Austria',croatie:'Croatia',roumanie:'Romania'};
+async function apiFindTeam(side){
+ const first=side===0,queryInput=$(first?'apiQueryHome':'apiQueryAway'),select=$(first?'apiHome':'apiAway'),info=$(first?'apiHomeInfo':'apiAwayInfo');
+ const entered=queryInput.value.trim()||$(first?'home':'away').value.trim();
+ if(entered.length<3)throw Error(`Saisis au moins trois lettres dans le nom de l’équipe ${side+1}.`);
+ queryInput.value=entered;const query=apiFrenchNames[norm(entered)]||entered;
+ select.value='';select.innerHTML='<option value="">Recherche en cours…</option>';info.textContent=`Recherche de ${query}…`;
+ try{const result=await apiRequest('teams',{search:query});apiTeamOptions(select,result.response,query);info.textContent=result.response.length?`${result.response.length} résultat(s). ${select.value?'Équipe sélectionnée : vérifie le pays.':'Ouvre la liste et choisis le pays et le type corrects.'}`:'Aucune équipe trouvée. Essaie le nom anglais ou un identifiant API.';return result.response.length}
+ catch(error){info.textContent=error.message;select.innerHTML='<option value="">Recherche échouée : voir le message</option>';throw error}
+}
+function apiFixtureText(f){
+ const d=new Date(f.fixture.date).toLocaleDateString('fr-FR',{timeZone:'Europe/Brussels',day:'2-digit',month:'2-digit',year:'2-digit'}).replaceAll('/','.');
+ return [d,f.teams.home.name,f.teams.home.name,f.teams.away.name,f.teams.away.name,String(f.goals.home),String(f.goals.away)].join('\n');
+}
+function apiStatText(f,stats){
+ const read=(id,type)=>{const list=stats.find(x=>x.team?.id===id)?.statistics||[],row=list.find(x=>x.type===type),v=row?.value;
+  // L'API renvoie null (et non 0) pour les cartons quand il n'y en a pas : on lit 0 si les autres statistiques du match existent.
+  if((v===null||v===undefined||v==='')&&row&&['Yellow Cards','Red Cards'].includes(type)&&list.some(x=>x.type!==type&&x.value!==null&&x.value!==undefined&&x.value!==''))return '0';
+  return v!==null&&v!==undefined&&v!==''&&Number.isInteger(Number(v))&&Number(v)>=0?String(v):'-'};
+ return [['Corner Kicks','corner'],['Yellow Cards','carton jaune'],['Red Cards','carton rouge']].flatMap(([type,label])=>[`${read(f.teams.home.id,type)} (${label} domicile)`,`${read(f.teams.away.id,type)} (${label} extérieur)`]).join('\n');
+}
+$('apiTest').onclick=()=>apiAction(async()=>{
+ $('apiStatus').textContent='Test de la clé…';const result=await apiRequest('status'),r=result.response;
+ $('apiStatus').textContent=`Connexion réussie${r?.requests?' · Requêtes : '+r.requests.current+'/'+r.requests.limit_day:''}. Tu peux rechercher les équipes.`;
+});
+$('apiFindHome').onclick=()=>apiAction(async()=>{await apiFindTeam(0);$('apiStatus').textContent='Recherche de l’équipe 1 terminée. Regarde le résultat dans sa colonne.'});
+$('apiFindAway').onclick=()=>apiAction(async()=>{await apiFindTeam(1);$('apiStatus').textContent='Recherche de l’équipe 2 terminée. Regarde le résultat dans sa colonne.'});
+$('apiSearch').onclick=()=>apiAction(async()=>{
+ $('apiStatus').textContent='Recherche des équipes…';const one=await apiFindTeam(0),two=await apiFindTeam(1);
+ $('apiStatus').textContent=one&&two?'Vérifie les deux équipes dans les listes, puis importe les cinq matchs.':'Une recherche est vide : consulte le message dans chaque colonne.';
+});
+for(const [id,side] of [['apiQueryHome',0],['apiQueryAway',1]])$(id).addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();apiAction(()=>apiFindTeam(side))}});
+$('apiLoad').onclick=()=>apiAction(async()=>{
+ const ids=[$('apiHomeId').value.trim()||$('apiHome').value,$('apiAwayId').value.trim()||$('apiAway').value],cutoff=$('matchDate').value,season=$('apiSeason').value;
+ if(!/^20\d{2}$/.test(season))throw Error('Choisis une saison API valide.');
+ if(ids.some(x=>!/^\d+$/.test(x))||ids[0]===ids[1])throw Error('Sélectionne deux équipes différentes après la recherche.');
+ if(!cutoff)throw Error('Saisis la date du match prévu en haut.');
+ const staged=[];let missing=0;
+ for(let side=0;side<2;side++){
+  $('apiStatus').textContent=`Équipe ${side+1}/2 : récupération des matchs terminés…`;
+  const data=await apiRequest('fixtures',{team:ids[side],season,status:'FT',timezone:'Europe/Brussels'});
+  const matches=data.response.filter(f=>f.fixture?.status?.short==='FT'&&Number.isInteger(f.goals?.home)&&Number.isInteger(f.goals?.away)&&new Date(f.fixture.date).toLocaleDateString('sv-SE',{timeZone:'Europe/Brussels'})<cutoff).sort((a,b)=>Date.parse(b.fixture.date)-Date.parse(a.fixture.date)).slice(0,5);
+  if(!matches.length)throw Error(`Aucun match terminé avant ${cutoff} pour l’équipe ${side+1}. Ton offre peut limiter les saisons accessibles.`);
+  const texts=[];
+  for(let i=0;i<matches.length;i++){
+   const f=matches[i];$('apiStatus').textContent=`Équipe ${side+1}/2 · statistiques du match ${i+1}/${matches.length}…`;
+   let stats=apiCache.get(f.fixture.id);
+   if(!stats){stats=(await apiRequest('fixtures/statistics',{fixture:f.fixture.id})).response;apiCache.set(f.fixture.id,stats)}
+   const raw=apiStatText(f,stats);if(raw.includes('- ('))missing++;texts.push(raw);
+  }
+  const picked=matches[0].teams.home.id===Number(ids[side])?matches[0].teams.home:matches[0].teams.away;
+  if(picked.id!==Number(ids[side]))throw Error('L’équipe ne correspond pas aux matchs reçus.');
+  staged.push({name:picked.name,matches,texts});
+ }
+ for(let side=0;side<2;side++){
+  $(side===0?'home':'away').value=staged[side].name;
+  $(side===0?'recentHome':'recentAway').value=staged[side].matches.map(apiFixtureText).join('\n\n');
+  for(let i=0;i<5;i++)$((side===0?'statHome':'statAway')+i).value=staged[side].texts[i]||'';
+ }
+ $('h2h').value='';update();
+ $('apiStatus').textContent=`Import terminé : ${staged[0].matches.length} et ${staged[1].matches.length} matchs. ${missing?missing+' bloc(s) avec des statistiques absentes : marchés concernés calculés uniquement avec les valeurs connues.':'Corners, jaunes et rouges remplis automatiquement.'} Les rencontres avec prolongation sont exclues. Les cinq derniers matchs disponibles de la saison ${season} ont été utilisés, avant la date prévue. Une saison ancienne ne décrit pas la forme actuelle.`;
+ $('statsInfo').scrollIntoView({behavior:'smooth',block:'center'});
+});
+$('apiForget').onclick=()=>{$('apiKey').value='';apiCache.clear();$('apiStatus').textContent='Clé effacée.'};
+function parseFifaList(raw){
+ const lines=raw.split(/\r?\n/).map(x=>x.trim().replace(/^"|"$/g,'')).filter(Boolean).filter(x=>!['#','Name','Points'].includes(x));
+ const result=[],seen=new Set();let index=0;
+ while(index<lines.length){
+  const head=lines[index++],rankMatch=head.match(/^(\d{1,3})\.$/);
+  if(!rankMatch)throw Error(`Rang attendu à la ligne « ${head.slice(0,45)} ».`);
+  const rank=Number(rankMatch[1]),name=lines[index++];
+  if(!name||/^(?:[+-]\d+|\d+(?:[.,]\d+)?)$/.test(name))throw Error(`Nom manquant au rang ${rank}.`);
+  if(/^[+-]\d+$/.test(lines[index]||''))index++;
+  const pointText=lines[index++],points=Number((pointText||'').replace(',','.'));
+  if(!/^[0-9]{3,4}(?:[.,][0-9]{1,2})?$/.test(pointText||'')||points<400||points>2500)throw Error(`Points invalides au rang ${rank} (${name}).`);
+  const key=nationKey(name);
+  if(rank<1||rank>250||seen.has(key)||result.some(x=>x.rank===rank))throw Error(`Rang ou sélection en double : ${name}.`);
+  seen.add(key);result.push({rank,name,points});
+ }
+ if(!result.length)throw Error('Colle au moins une sélection.');
+ return result.sort((a,b)=>a.rank-b.rank);
+}
+function showFifa(message=''){
+ $('rankingStatus').textContent=message||`${fifaDb.teams.length} nations enregistrées · date : ${fifaDb.date||'non renseignée'} · référence fournie par toi, non actualisée automatiquement.`;
+ $('rankingPreview').innerHTML=`<details><summary>Voir les ${fifaDb.teams.length} sélections enregistrées</summary><div class="fifa-list"><table><thead><tr><th>Rang</th><th>Nation</th><th>Points</th></tr></thead><tbody>${fifaDb.teams.map(x=>`<tr><td>${x.rank}</td><td>${escapeHtml(x.name)}</td><td>${Number(x.points).toFixed(2)}</td></tr>`).join('')}</tbody></table></div></details>`;
+ $('rankingDate').value=fifaDb.date;
+}
+$('rankingSave').onclick=()=>{
+ try{
+  const teams=parseFifaList($('rankingPaste').value),candidate={version:1,date:$('rankingDate').value,teams};
+  localStorage.setItem(fifaKey,JSON.stringify(candidate));fifaDb=candidate;
+  dbStatus();
+  showFifa(`${teams.length} nations enregistrées. Les points sont désormais appliqués aux prochains calculs si les noms correspondent.`);update();
+ }catch(e){$('rankingStatus').textContent=`Classement non modifié : ${e.message}`}
+};
+$('rankingExport').onclick=()=>{
+ const blob=new Blob([JSON.stringify(fifaDb,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+ link.href=url;link.download='classement_fifa_nations.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+/* ===== Base de données automatique (gratuite) ===== */
+const natUrls=['https://raw.githubusercontent.com/martj42/international_results/master/results.csv','https://cdn.jsdelivr.net/gh/martj42/international_results@master/results.csv','data/nations.csv'];
+const clubUrl='data/clubs.json';
+const auto={teams:new Map(),elo:new Map(),eloRank:new Map(),leagues:[],lgMean:[]};
+const frDate=iso=>iso.split('-').reverse().join('.');
+const todayIso=()=>new Date().toLocaleDateString('sv-SE');
+const yearsAgo=(iso,y)=>new Date(Date.parse(iso+'T00:00:00Z')-y*365.25*86400000).toISOString().slice(0,10);
+const autoNames=()=>{const limit=yearsAgo(todayIso(),4);return [...auto.teams.values()].filter(t=>t.last>=limit).map(t=>t.name)};
+function dropKind(kind){for(const [k,t] of [...auto.teams])if(t.kind===kind)auto.teams.delete(k)}
+function addMatch(kind,m){
+ for(const name of [m.home,m.away]){
+  const k=norm(name);if(!k)continue;
+  let t=auto.teams.get(k);if(!t){t={name,kind,list:[],last:'',lg:m.lg};auto.teams.set(k,t)}
+  if(t.kind===kind){t.list.push(m);if(m.iso>t.last){t.last=m.iso;if(m.lg!==undefined)t.lg=m.lg}}
+ }
+}
+function parseCsvLine(line){
+ const out=[];let cur='',q=false;
+ for(let i=0;i<line.length;i++){const c=line[i];
+  if(q){if(c==='"'){if(line[i+1]==='"'){cur+='"';i++}else q=false}else cur+=c}
+  else if(c==='"')q=true;else if(c===','){out.push(cur);cur=''}else cur+=c}
+ out.push(cur);return out;
+}
+function parseNational(text){
+ const lines=text.split(/\r?\n/),head=parseCsvLine(lines[0]||'').map(x=>x.trim().replace(/^﻿/,''));
+ const ix=Object.fromEntries(['date','home_team','away_team','home_score','away_score','tournament','neutral'].map(n=>[n,head.indexOf(n)]));
+ if(['date','home_team','away_team','home_score','away_score'].some(n=>ix[n]<0))throw Error('format de la base inattendu');
+ const rows=[];
+ for(let i=1;i<lines.length;i++){
+  if(!lines[i])continue;const c=parseCsvLine(lines[i]);
+  const g1=parseInt(c[ix.home_score],10),g2=parseInt(c[ix.away_score],10),iso=(c[ix.date]||'').trim();
+  if(!/^\d{4}-\d\d-\d\d$/.test(iso)||!Number.isFinite(g1)||!Number.isFinite(g2)||!c[ix.home_team]||!c[ix.away_team])continue;
+  rows.push({iso,home:c[ix.home_team].trim(),away:c[ix.away_team].trim(),g1,g2,tour:(c[ix.tournament]||'').trim(),neutral:(c[ix.neutral]||'').trim().toUpperCase()==='TRUE'});
+ }
+ if(rows.length<1000)throw Error('base incomplète');
+ return rows;
+}
+function eloK(tour){
+ const t=tour.toLowerCase();
+ if(t==='friendly')return 20;
+ if(t==='fifa world cup')return 60;
+ if(t.includes('qualification'))return 40;
+ if(['uefa euro','copa américa','copa america','african cup of nations','afc asian cup','gold cup','confederations cup'].some(x=>t.startsWith(x)))return 50;
+ if(t.includes('nations league'))return 40;
+ return 30;
+}
+function computeElo(rows){
+ const elo=new Map(),get=t=>elo.get(t)??1500;
+ for(const r of [...rows].sort((a,b)=>a.iso<b.iso?-1:a.iso>b.iso?1:0)){
+  const rh=get(r.home),ra=get(r.away),we=1/(1+10**(-(rh+(r.neutral?0:100)-ra)/400));
+  const w=r.g1>r.g2?1:r.g1<r.g2?0:0.5,d=Math.abs(r.g1-r.g2),g=d<=1?1:d===2?1.5:(11+d)/8,delta=eloK(r.tour)*g*(w-we);
+  elo.set(r.home,rh+delta);elo.set(r.away,ra-delta);
+ }
+ auto.elo=new Map();for(const [name,v] of elo)auto.elo.set(nationKey(name),v);
+ const limit=yearsAgo(todayIso(),4);
+ const active=[...auto.teams.values()].filter(t=>t.kind==='nat'&&t.last>=limit).map(t=>[nationKey(t.name),auto.elo.get(nationKey(t.name))]).filter(x=>x[1]!==undefined).sort((a,b)=>b[1]-a[1]);
+ auto.eloRank=new Map(active.map(([k],i)=>[k,i+1]));
+}
+async function loadNational(){
+ const box=$('natStatus');box.textContent='Chargement des résultats des sélections…';
+ try{
+  let text=null,lastError=null;
+  for(const url of natUrls){
+   try{const r=await fetch(url,{cache:'no-cache'});if(!r.ok)throw Error('HTTP '+r.status);text=await r.text();break}catch(e){lastError=e}
+  }
+  if(!text)throw Error('connexion impossible ('+(lastError?.message||'réseau')+')');
+  const rows=parseNational(text);
+  dropKind('nat');for(const r of rows)addMatch('nat',{iso:r.iso,home:r.home,away:r.away,g1:r.g1,g2:r.g2});
+  computeElo(rows);
+  const last=rows.reduce((m,r)=>r.iso>m?r.iso:m,'');
+  box.textContent=`Sélections : ${rows.length.toLocaleString('fr-FR')} matchs · dernier résultat connu : ${frDate(last)} · note Elo calculée pour ${auto.elo.size} sélections. Base communautaire : un match très récent peut y apparaître avec quelques jours de retard.`;
+ }catch(e){
+  box.textContent='Sélections : base indisponible ('+e.message+'). Vérifie ta connexion puis clique sur « Recharger les données » (tu peux toujours coller les résultats à la main dans les options avancées).';
+ }
+ dbStatus();autoFill();update();
+}
+function registerClubs(data){
+ dropKind('club');auto.leagues=data.leagues||[];
+ const sums=auto.leagues.map(()=>[0,1,2].map(()=>({n:0,h:0,a:0})));
+ for(const r of data.matches){
+  const [iso,home,away,g1,g2,hc,ac,hy,ay,hr,ar,lg]=r,raw=[hc,ac,hy,ay,hr,ar];
+  const s=raw.every(v=>v===null||v===undefined)?null:raw;
+  addMatch('club',{iso,home,away,g1,g2,s,lg});
+  if(s&&sums[lg])for(let k=0;k<3;k++){const h=s[2*k],a=s[2*k+1];if(Number.isFinite(h)&&Number.isFinite(a)){const x=sums[lg][k];x.n++;x.h+=h;x.a+=a}}
+ }
+ auto.lgMean=sums.map(list=>list.map(x=>x.n>=30?{h:x.h/x.n,a:x.a/x.n,l:(x.h+x.a)/(2*x.n),n:x.n}:null));
+}
+function useClubData(data){
+ if(!data||!Array.isArray(data.matches)||data.matches.length<100||!Array.isArray(data.leagues))throw Error('fichier clubs.json invalide');
+ registerClubs(data);
+ const when=data.updated?new Date(data.updated):null,age=when?(Date.now()-when.getTime())/864e5:null;
+ const withStats=data.leagues.filter(l=>l.stats).length;
+ $('clubStatus').textContent=`Clubs : ${data.matches.length.toLocaleString('fr-FR')} matchs · ${data.leagues.length} championnats de première division (${withStats} avec corners et cartons) · mis à jour le ${when?when.toLocaleDateString('fr-FR'):'(date inconnue)'}.`+(age!==null&&age>10?' Attention : données anciennes, la mise à jour automatique semble arrêtée (onglet Actions de ton dépôt GitHub).':'');
+}
+async function loadClubs(){
+ const box=$('clubStatus');box.textContent='Clubs : chargement…';
+ try{
+  const r=await fetch(clubUrl,{cache:'no-cache'});if(!r.ok)throw Error('HTTP '+r.status);
+  useClubData(await r.json());
+ }catch(e){
+  box.textContent='Clubs : base non trouvée ('+(e.message||'réseau')+'). Active la mise à jour automatique (voir plus bas) ou charge un fichier clubs.json. Les sélections nationales fonctionnent déjà.';
+ }
+ dbStatus();autoFill();update();
+}
+let lastAuto={recentHome:'',recentAway:'',h2h:''};
+const matchText=m=>{const [y,mo,d]=m.iso.split('-');return [`${d}.${mo}.${y}`,m.home,m.home,m.away,m.away,m.g1,m.g2].join('\n')};
+const lgLabel=t=>t.kind==='club'&&auto.leagues[t.lg]?` (${auto.leagues[t.lg].name}, ${auto.leagues[t.lg].country})`:'';
+function autoFill(){
+ const st=$('autoStatus'),home=$('home').value.trim(),away=$('away').value.trim(),cutoff=$('matchDate').value;
+ const warn=text=>{st.className='status warn';st.textContent=text;return false};
+ if(!home||!away)return warn('Choisis les deux équipes dans les listes.');
+ if(!/^\d{4}-\d\d-\d\d$/.test(cutoff))return warn('Choisis la date du match.');
+ if(!auto.teams.size)return warn('Base de données en cours de chargement…');
+ const A=auto.teams.get(norm(home)),B=auto.teams.get(norm(away));
+ if(!A||!B)return warn(`Équipe absente de la base : ${[!A&&home,!B&&away].filter(Boolean).join(', ')}. Choisis un nom proposé dans la liste, ou colle les résultats à la main dans les options avancées.`);
+ if(A===B)return warn('Choisis deux équipes différentes.');
+ const lo=yearsAgo(cutoff,5),recent=t=>t.list.filter(m=>m.iso<cutoff&&m.iso>=lo).sort((a,b)=>b.iso.localeCompare(a.iso)).slice(0,60);
+ const wA=recent(A),wB=recent(B),hk=norm(home),ak=norm(away),lo2=yearsAgo(cutoff,12);
+ const duels=A.list.filter(m=>m.iso<cutoff&&m.iso>=lo2&&((norm(m.home)===hk&&norm(m.away)===ak)||(norm(m.home)===ak&&norm(m.away)===hk))).sort((a,b)=>b.iso.localeCompare(a.iso)).slice(0,10);
+ let kept=false;
+ const put=(id,list)=>{const el=$(id),val=list.map(matchText).join('\n\n');if(!el.value.trim()||el.value===lastAuto[id]){el.value=val;lastAuto[id]=val}else kept=true};
+ put('recentHome',wA);put('recentAway',wB);put('h2h',duels);
+ const old=[[A,wA],[B,wB]].filter(([,w])=>w[0]&&w[0].iso<yearsAgo(todayIso(),0.4)).map(([t])=>t.name);
+ const low=[[A,wA],[B,wB]].filter(([,w])=>w.length<3).map(([t])=>t.name);
+ const parts=[`Base automatique : ${A.name}${lgLabel(A)} ${wA.length} matchs${wA[0]?' (dernier le '+frDate(wA[0].iso)+')':''} · ${B.name}${lgLabel(B)} ${wB.length} matchs${wB[0]?' (dernier le '+frDate(wB[0].iso)+')':''}${duels.length?' · '+duels.length+' confrontation(s) directe(s)':''}.`];
+ let risky=false;
+ if(A.kind!==B.kind){risky=true;parts.push('Une sélection et un club ne sont pas comparables : le résultat n’a pas de sens.')}
+ else if(A.kind==='club'&&A.lg!==B.lg){risky=true;parts.push('Clubs de championnats différents : le niveau relatif des championnats n’est pas connu, estimation peu fiable.')}
+ if(kept)parts.push('Des résultats collés à la main sont conservés (vide les cases dans les options avancées pour utiliser la base).');
+ if(low.length)parts.push(`Pas assez de matchs récents pour ${low.join(', ')} (minimum 3).`);
+ if(old.length)parts.push(`Données anciennes pour ${old.join(', ')} : la base n’est peut-être pas à jour.`);
+ st.className='status'+(low.length||old.length||kept||risky?' warn':'');st.textContent=parts.join(' ');
+ return true;
+}
+/* ----- Corners et cartons (clubs, modèle de Poisson) ----- */
+const STAT_DEFS=[
+ {k:0,title:'Corners',lines:[7.5,8.5,9.5,10.5,11.5,12.5],teamLines:[3.5,4.5,5.5,6.5],prior:6},
+ {k:1,title:'Cartons jaunes',lines:[2.5,3.5,4.5,5.5,6.5],teamLines:[0.5,1.5,2.5],prior:6},
+ {k:2,title:'Cartons rouges',lines:[0.5,1.5],teamLines:[0.5],prior:12}
+];
+const pcs=x=>(100*x).toFixed(1).replace('.',',')+' %';
+const frn=(x,d=2)=>x.toFixed(d).replace('.',',');
+function overProb(lambda,line){const k=Math.floor(line);let p=Math.exp(-lambda),c=p;for(let i=1;i<=k;i++){p*=lambda/i;c+=p}return Math.min(1,Math.max(0,1-c))}
+function cardHtml(title,sample,body){return `<section class="market-card"><h3>${title}</h3><p class="sample">${sample}</p>${body}</section>`}
+function autoCounts(home,away,cutoff,halfLife){
+ const msg=t=>({html:cardHtml('Corners et cartons',t,'')});
+ const A=auto.teams.get(norm(home)),B=auto.teams.get(norm(away));
+ if(!home||!away||!A||!B)return msg('Choisis deux équipes de la base pour voir les probabilités de corners et de cartons.');
+ if(A.kind!=='club'||B.kind!=='club')return msg('Corners et cartons : disponibles uniquement pour les clubs des grands championnats de la base. Aucune source gratuite ne fournit ces statistiques pour les sélections nationales ; tu peux les saisir à la main dans les options avancées.');
+ const neutral=$('neutral').checked,lo=yearsAgo(cutoff,3),cards=[];
+ const rows=(t,idx)=>t.list.filter(m=>m.s&&m.iso<cutoff&&m.iso>=lo&&Number.isFinite(m.s[idx[0]])&&Number.isFinite(m.s[idx[1]])).sort((a,b)=>b.iso.localeCompare(a.iso));
+ const rates=(t,list,idx)=>{let w=0,f=0,a=0;for(const m of list){const isHome=norm(m.home)===norm(t.name),x=isHome?m.s[idx[0]]:m.s[idx[1]],y=isHome?m.s[idx[1]]:m.s[idx[0]],wt=Math.pow(0.5,ageDays(m.iso,cutoff)/halfLife);w+=wt;f+=wt*x;a+=wt*y}return {w,n:list.length,f:w?f/w:0,a:w?a/w:0}};
+ let skipped=0;
+ for(const def of STAT_DEFS){
+  const lgA=auto.lgMean[A.lg]?.[def.k],lgB=auto.lgMean[B.lg]?.[def.k];
+  if(!lgA||!lgB){skipped++;continue}
+  const idx=[2*def.k,2*def.k+1],lA=rows(A,idx),lB=rows(B,idx);
+  if(lA.length<5||lB.length<5){skipped++;continue}
+  const rA=rates(A,lA,idx),rB=rates(B,lB,idx),L=(lgA.l+lgB.l)/2,H=(lgA.h+lgB.h)/2,Aw=(lgA.a+lgB.a)/2;
+  const sh=(v,n)=>(n*v+def.prior*L)/(n+def.prior);
+  const lamA=sh(rA.f,rA.w)*sh(rB.a,rB.w)/L*(neutral?1:H/L),lamB=sh(rB.f,rB.w)*sh(rA.a,rA.w)/L*(neutral?1:Aw/L),lam=lamA+lamB;
+  const sample=new Map();
+  for(const [t,list] of [[A,lA],[B,lB]])for(const m of list.slice(0,10))sample.set([m.iso,m.home,m.away].join('|'),m.s[idx[0]]+m.s[idx[1]]);
+  const hist=[...sample.values()];
+  const totalRows=def.lines.map(line=>{const p=overProb(lam,line),k=hist.filter(x=>x>line).length;
+   return `<tr><td><b>${String(line).replace('.',',')}</b></td><td><span class="pct over">${pcs(p)}</span><div class="bar"><span style="width:${(p*100).toFixed(1)}%"></span></div></td><td><span class="pct under">${pcs(1-p)}</span><div class="bar"><span style="width:${((1-p)*100).toFixed(1)}%;background:#477fb6"></span></div></td><td class="past">${k} sur ${hist.length}</td></tr>`}).join('');
+  const teamRows=def.teamLines.map(line=>`<tr><td><b>${String(line).replace('.',',')}</b></td><td><span class="pct over">${pcs(overProb(lamA,line))}</span></td><td><span class="pct over">${pcs(overProb(lamB,line))}</span></td></tr>`).join('');
+  cards.push(cardHtml(`${def.title} · total des deux équipes`,`Attendu : ${escapeHtml(A.name)} ${frn(lamA)} · ${escapeHtml(B.name)} ${frn(lamB)} · total ${frn(lam)} (moyenne du championnat ${frn(2*L)}) · calculé sur ${rA.n} et ${rB.n} matchs`,
+   `<table><thead><tr><th>Ligne</th><th>Plus de</th><th>Moins de</th><th>Plus observé</th></tr></thead><tbody>${totalRows}</tbody></table><p class="sample" style="margin-top:12px"><b>Par équipe</b> (probabilité de « plus de »)</p><table><thead><tr><th>Ligne</th><th>${escapeHtml(A.name)}</th><th>${escapeHtml(B.name)}</th></tr></thead><tbody>${teamRows}</tbody></table>`));
+ }
+ if(!cards.length)return msg('Statistiques de corners et de cartons indisponibles ou insuffisantes (minimum 5 matchs par équipe) pour ces clubs : la source gratuite ne les fournit pas pour tous les championnats. Saisie manuelle possible dans les options avancées.');
+ const cross=A.lg!==B.lg?'<p class="market-help"><b>Championnats différents :</b> estimation moins fiable.</p>':'';
+ return {html:cards.join('')+cross+`<p class="market-help">Exemple : sur la ligne 4,5, « Plus de » = au moins 5 ; « Moins de » = au plus 4. Estimation par loi de Poisson à partir des moyennes pondérées des deux équipes (4 dernières saisons), avec avantage du terrain du championnat. « Plus observé » compte les 10 derniers matchs de chaque équipe. Indicatif : aucune garantie.${skipped?' '+skipped+' marché(s) non calculé(s) faute de données.':''}</p>`};
+}
+function initAuto(){
+ for(const id of ['home','away','matchDate'])$(id).addEventListener('input',()=>{autoFill();update()});
+ $('dataReload').onclick=()=>{loadNational();loadClubs()};
+ $('clubFile').onchange=async event=>{
+  const file=event.target.files?.[0];if(!file)return;
+  try{useClubData(JSON.parse(await file.text()));dbStatus();autoFill();update()}catch(e){$('clubStatus').textContent='Fichier refusé : '+e.message}
+  event.target.value='';
+ };
+ loadNational();loadClubs();
+}
+showFifa();
+$('matchDate').value=new Date().toLocaleDateString('sv-SE');
+for(const id of ['home','away','recentHome','recentAway','h2h','matchDate','halfLife','neutral','useFifa','ratingHome','ratingAway',...statFieldIds])$(id).addEventListener('input',update);
+dbStatus();update();
+initAuto();
+</script></body></html>

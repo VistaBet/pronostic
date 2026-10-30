@@ -1,0 +1,75 @@
+PRONOSTIC FOOTBALL AUTOMATIQUE - MODE D'EMPLOI
+==============================================
+
+Ce que fait l'outil
+-------------------
+Tu choisis deux équipes et une date : la page calcule toute seule
+  - victoire / nul / défaite (1 N 2)
+  - plus/moins de buts (0,5 à 5,5), les deux équipes marquent, scores exacts
+  - handicaps : victoire avec au moins 1, 2, 3 ou 4 buts d'écart
+  - corners, cartons jaunes, cartons rouges (total et par équipe)
+Rien à copier-coller. Tout est gratuit.
+
+D'où viennent les données
+-------------------------
+- Sélections nationales : tous les matchs internationaux (base ouverte
+  "international_results", GitHub). La page la télécharge à chaque ouverture.
+  Corners et cartons : aucune source gratuite pour les sélections.
+- Clubs : première division de 27 pays (football-data.co.uk), 4 dernières saisons.
+    * Corners + cartons + buts : Angleterre, Écosse, Allemagne, Italie, Espagne,
+      France, Pays-Bas, BELGIQUE, Portugal, Turquie, Grèce.
+    * Buts seulement : Argentine, Autriche, Brésil, Chine, Danemark, Finlande,
+      Irlande, Japon, Mexique, Norvège, Pologne, Roumanie, Russie, Suède,
+      Suisse, États-Unis.
+  Un robot gratuit (GitHub Actions) télécharge ces fichiers chaque jour dans
+  TON dépôt GitHub. Ta page lit ensuite ce fichier. C'est ce qui rend la
+  mise à jour automatique, sans payer.
+
+Mise en place (une seule fois, environ 10 minutes)
+--------------------------------------------------
+(Les menus GitHub peuvent être en anglais ; les noms ci-dessous sont ceux-là.)
+
+1. Crée un compte gratuit sur https://github.com
+2. Clique sur "+" (en haut à droite) > "New repository".
+   Nom : pronostic      Visibilité : PUBLIC (obligatoire pour l'hébergement gratuit)
+   Coche "Add a README file" puis "Create repository".
+3. Dans le dépôt : "Add file" > "Upload files". Glisse TOUT le contenu du dossier
+   dézippé : index.html, LISEZ-MOI.txt, les dossiers scripts et data, et le
+   dossier .github (il est parfois caché : sur Mac, Cmd+Maj+. pour l'afficher).
+   Clique sur "Commit changes".
+   > Si le dossier .github n'a pas pu être envoyé : "Add file" > "Create new file",
+     tape comme nom : .github/workflows/update.yml
+     et colle le contenu du fichier workflow-a-copier-si-besoin.yml.txt.
+4. Onglet "Settings" > "Pages" > Source : "Deploy from a branch" >
+   Branch : main, dossier / (root) > "Save".
+5. Onglet "Actions" : si GitHub demande d'activer les workflows, accepte.
+   Choisis "Mise à jour des données" > "Run workflow" (bouton vert).
+   Attends 1 à 3 minutes (une coche verte apparaît). Le robot a créé
+   data/clubs.json. Il se relancera ensuite tout seul chaque jour.
+6. Ouvre https://TON-PSEUDO.github.io/pronostic/
+   (la première mise en ligne peut prendre quelques minutes).
+   Elle fonctionne aussi sur téléphone. Mets-la en favori.
+
+En cas de problème
+------------------
+- "Clubs : base non trouvée" : le robot n'a pas encore tourné (étape 5) ou
+  Pages n'est pas activé (étape 4). Tu peux aussi télécharger data/clubs.json
+  depuis ton dépôt et le charger à la main dans la page ("Base de données").
+- Le robot affiche une croix rouge : ouvre l'exécution dans l'onglet Actions, la
+  liste de ce qui a été téléchargé s'affiche à la fin. Il garde l'ancien fichier
+  si le téléchargement échoue.
+- Un championnat supplémentaire manque : son fichier n'a peut-être pas été
+  trouvé chez football-data.co.uk. Les 11 grands championnats sont les plus fiables.
+- GitHub peut suspendre un robot planifié après environ 60 jours sans activité
+  dans le dépôt : si les données deviennent anciennes (la page l'indique),
+  relance-le avec "Run workflow".
+- Ouvrir index.html directement depuis ton ordinateur fonctionne pour les
+  sélections ; pour les clubs, charge clubs.json à la main.
+
+Limites à connaître
+-------------------
+- Ce sont des estimations statistiques, pas des certitudes. Compare toujours
+  à la cote proposée et ne joue que ce que tu peux te permettre de perdre.
+- Pas de blessures, compositions, arbitre, météo ni motivation dans le calcul.
+- Deux clubs de championnats différents : estimation peu fiable (la page prévient).
+- Les scores des sélections incluent la prolongation (approximation du 90 min).
